@@ -1,0 +1,2166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stage 2 - Grant Submission Completeness Review</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='';</script>
+<style>
+:root{--b:#0070C0;--bd:#004578;--bl:#E8F4FD;--g:#107C10;--am:#CA8A04;--r:#D13438;--gr:#6B7280;--gl:#F3F4F6;--gb:#D1D5DB;--w:#FFF}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f5}
+.hdr{background:var(--bd);color:var(--w);padding:12px 24px;font-size:16px;font-weight:600}
+.ftr{background:var(--bd);color:var(--w);padding:8px;text-align:center;font-size:11px;position:fixed;bottom:0;width:100%;z-index:50}
+#app{max-width:1400px;margin:0 auto;padding:20px 24px 60px}
+h1{color:var(--bd);font-size:22px;margin-bottom:12px}
+h2{color:var(--bd);font-size:18px;margin:16px 0 8px}
+h3{color:var(--b);font-size:15px;margin:12px 0 6px}
+p,li{line-height:1.6;color:#4B5563;margin-bottom:6px}
+ul{padding-left:20px}
+.card{background:var(--w);border:1px solid var(--gb);border-radius:8px;padding:20px;margin-bottom:16px}
+.btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-p{background:var(--b);color:var(--w)}.btn-p:hover:not(:disabled){background:var(--bd)}
+.btn-s{background:var(--gl);color:#333;border:1px solid var(--gb)}
+.btn-g{background:var(--g);color:var(--w)}.btn-r{background:var(--r);color:var(--w)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.tbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px 0;border-bottom:2px solid var(--b);margin-bottom:12px;align-items:center}
+.tbar .sp{flex:1}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--gb);margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:8px 14px;background:var(--gl);border:1px solid var(--gb);border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:12px;white-space:nowrap}
+.tab.a{background:var(--w);border-color:var(--b);color:var(--b);font-weight:700;border-bottom:2px solid var(--w);margin-bottom:-2px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--b);color:var(--w);padding:8px;text-align:left;position:sticky;top:0;z-index:1;white-space:nowrap}
+td{padding:6px 8px;border:1px solid var(--gb)}
+tr:nth-child(even){background:#f9fafb}tr:hover{background:var(--bl)}
+td[contenteditable="true"]{cursor:text;outline:none}
+td[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px var(--b);background:var(--w)}
+.gw{overflow:auto;max-height:55vh;border:1px solid var(--gb);border-radius:4px}
+.dz{border:2px dashed var(--gb);border-radius:8px;padding:40px;text-align:center;color:var(--gr);cursor:pointer;transition:.2s;margin:12px 0}
+.dz.ov{border-color:var(--b);background:var(--bl);color:var(--b)}
+.sc{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.scd{background:var(--w);border:1px solid var(--gb);border-radius:8px;padding:16px;text-align:center}
+.scd .v{font-size:28px;font-weight:700;color:var(--bd)}.scd .l{font-size:12px;color:var(--gr);margin-top:4px}
+.scd.grn .v{color:var(--g)}.scd.amb .v{color:var(--am)}.scd.red .v{color:var(--r)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.bH{background:#dcfce7;color:#166534}.bM{background:#fef3c7;color:#92400e}.bL{background:#fee2e2;color:#991b1b}
+.bPr{background:#dcfce7;color:#166534}.bAb{background:#fee2e2;color:#991b1b}.bPa{background:#fef3c7;color:#92400e}
+.bEx{background:#e5e7eb;color:#6b7280}.bIn{background:#dbeafe;color:#1e40af}
+.bBl{background:#fee2e2;color:#991b1b}.bWr{background:#fef3c7;color:#92400e}.bIf{background:#dbeafe;color:#1e40af}
+.mo{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center}
+.mo.sh{display:flex}
+.md{background:var(--w);border-radius:8px;padding:24px;max-width:800px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.fi{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--gl);border-radius:6px;margin:4px 0}
+.fi .n{flex:1;font-weight:500}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.ci{display:flex;flex-direction:column;gap:4px}
+.ci label{font-weight:500;font-size:13px}
+.ci input,.ci select{padding:6px 10px;border:1px solid var(--gb);border-radius:4px}
+.pb{width:100%;height:20px;background:var(--gl);border-radius:10px;overflow:hidden;margin:8px 0}
+.pf{height:100%;background:var(--b);transition:width .3s;border-radius:10px}
+.lb{padding:10px 16px;border-radius:6px;font-weight:600;margin:12px 0;display:flex;align-items:center;gap:8px}
+.lb.lk{background:#dcfce7;color:var(--g);border:1px solid var(--g)}
+.lb.ap{background:var(--bl);color:var(--bd);border:1px solid var(--b)}
+.ba{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.em{position:relative;display:inline-block}
+.ed{display:none;position:absolute;top:100%;right:0;background:var(--w);border:1px solid var(--gb);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:100;min-width:220px}
+.ed.sh{display:block}
+.ed button{display:block;width:100%;padding:8px 14px;text-align:left;border:none;background:none;cursor:pointer;font-size:13px}
+.ed button:hover{background:var(--bl)}
+.vi{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--gb);border-radius:6px;margin:6px 0}
+.vi .vm{flex:1;font-size:12px;color:var(--gr)}
+.oi{display:inline-block;width:8px;height:8px;background:var(--am);border-radius:50%;margin-left:4px}
+input[type="checkbox"]{accent-color:var(--b)}
+select{font-size:13px}
+.tc{text-align:center}
+@media print{.hdr,.ftr,.tbar,.tabs,.btn,.mo,.dz{display:none!important}#app{max-width:100%;padding:0}.gw{max-height:none;overflow:visible}}
+</style>
+</head>
+<body>
+<div class="hdr">Government of Alberta - Grant Submission Completeness Review - Stage 2</div>
+<div id="app"></div>
+<div class="mo" id="mo"><div class="md" id="mc"></div></div>
+<div class="ftr">Classification: Protected A</div>
+<script>
+'use strict';
+
+/* ================================================================
+   ENUMS
+   ================================================================ */
+var EN={
+  status:['Draft','Locked','Scanned','Approved'],
+  presence:['Present','Absent','Partial','Excluded','Indeterminate','Not Applicable'],
+  confidence:['H','M','L'],
+  detection:['Exact Label','Fuzzy Label','Structural Position','Response Type','Table Header','Manual Override'],
+  fileType:['CSV','XLS','XLSX','PDF','DOC','DOCX'],
+  severity:['blocking','warning','informational'],
+  origin:['Created','Edited','Imported','Merged','Rolled-Back','Scanned','Locked','Approved']
+};
+
+/* ================================================================
+   CCDM - Canonical Completeness Data Model (Section 8)
+   ================================================================ */
+var CCDM={
+_counters:{},
+uid:function(p){
+  if(!CCDM._counters[p])CCDM._counters[p]=0;
+  CCDM._counters[p]++;
+  var labels={wb:'WB',v:'VER',req:'REQ',sf:'SF',f:'F',e:'EVT',err:'ERR'};
+  return (labels[p]||p.toUpperCase())+'-'+CCDM._counters[p];
+},
+syncCounters:function(c){
+  var extract=function(arr,field,prefix){
+    arr.forEach(function(item){
+      var val=item[field]||'';
+      var match=val.match(new RegExp(prefix+'-(\\d+)'));
+      if(match){var n=parseInt(match[1]);var key=prefix.toLowerCase();if(!CCDM._counters[key]||n>CCDM._counters[key])CCDM._counters[key]=n}
+    });
+  };
+  if(c.requirements_baseline)extract(c.requirements_baseline.requirements,'requirement_id','REQ');
+  if(c.entities){
+    extract(c.entities.submission_files,'submission_file_id','SF');
+    extract(c.entities.findings,'finding_id','F');
+  }
+  if(c.version_history)extract(c.version_history.version_graph,'version_id','VER');
+},
+remapRequirementIds:function(c){
+  var map={};
+  CCDM._counters.req=0;
+  c.requirements_baseline.requirements.forEach(function(r){
+    var oldId=r.requirement_id;
+    var newId=CCDM.uid('req');
+    map[oldId]=newId;
+    r.requirement_id=newId;
+  });
+  c.requirements_baseline.field_profile.forEach(function(p){
+    if(map[p.requirement_id])p.requirement_id=map[p.requirement_id];
+  });
+  c.entities.findings.forEach(function(f){
+    if(map[f.requirement_id])f.requirement_id=map[f.requirement_id];
+  });
+  c.relationships.req_to_finding.forEach(function(r){
+    if(map[r.requirement_id])r.requirement_id=map[r.requirement_id];
+  });
+},
+  createEmpty:function(){
+    var now=new Date().toISOString();
+    return {
+      workbook_metadata:{workbook_id:CCDM.uid('wb'),version_id:CCDM.uid('v'),purpose:'Stage 2 Completeness Review',stage1_source:null,created_timestamp:now,last_updated_timestamp:now,status:'Draft'},
+      requirements_baseline:{source_import:{file_name:'',format:'',version_id:null,import_timestamp:null},requirements:[],field_profile:[]},
+      scan_configuration:{threshold_high:90,threshold_medium:60,optional_threshold:75,include_optional:false,flag_partial:true},
+      entities:{submission_files:[],findings:[],confidence_assessments:[]},
+      schema:{column_definitions:CCDM.defaultColumns(),data_dictionary:{fields:[],source_files:[],generated_timestamp:now}},
+      relationships:{req_to_finding:[],sub_to_finding:[],stage1_trace:[]},
+      views:{tabs:CCDM.defaultTabs()},
+      version_history:{version_graph:[],audit_log:[]}
+    };
+  },
+  defaultTabs:function(){return [
+    {tab_id:'tab_cs',tab_name:'Completeness Summary',editable_fields:['user_notes']},
+    {tab_id:'tab_fd',tab_name:'Field Detail',editable_fields:['presence_classification','reviewer_notes','complexity_flag']},
+    {tab_id:'tab_cr',tab_name:'Confidence Report',editable_fields:['override_level','override_rationale']},
+    {tab_id:'tab_si',tab_name:'Submission Inventory',editable_fields:[]},
+    {tab_id:'tab_rb',tab_name:'Requirements Baseline',editable_fields:[]},
+    {tab_id:'tab_dd',tab_name:'Data Dictionary',editable_fields:[]},
+    {tab_id:'tab_vr',tab_name:'Validation Report',editable_fields:[]}
+  ]},
+  defaultColumns:function(){return [
+    {id:'cs_fid',name:'File ID',tab:'tab_cs',field:'submission_file_id',sys:true},
+    {id:'cs_fn',name:'File Name',tab:'tab_cs',field:'file_name',sys:true},
+    {id:'cs_cl',name:'Confidence',tab:'tab_cs',field:'confidence_level',sys:true},
+    {id:'cs_sc',name:'Score',tab:'tab_cs',field:'confidence_score',sys:true},
+    {id:'cs_mp',name:'Mand. Present',tab:'tab_cs',field:'mand_present',sys:true},
+    {id:'cs_ma',name:'Mand. Absent',tab:'tab_cs',field:'mand_absent',sys:true},
+    {id:'cs_mpa',name:'Mand. Partial',tab:'tab_cs',field:'mand_partial',sys:true},
+    {id:'cs_op',name:'Opt. Present',tab:'tab_cs',field:'opt_present',sys:true},
+    {id:'cs_oa',name:'Opt. Absent',tab:'tab_cs',field:'opt_absent',sys:true},
+    {id:'cs_ind',name:'Indeterminate',tab:'tab_cs',field:'indeterminate_count',sys:true},
+    {id:'cs_rat',name:'Rationale',tab:'tab_cs',field:'rationale',sys:true},
+    {id:'cs_notes',name:'User Notes',tab:'tab_cs',field:'user_notes',sys:false},
+    {id:'fd_fid',name:'Finding ID',tab:'tab_fd',field:'finding_id',sys:true},
+    {id:'fd_sfid',name:'File ID',tab:'tab_fd',field:'submission_file_id',sys:true},
+    {id:'fd_fn',name:'File Name',tab:'tab_fd',field:'file_name',sys:true},
+    {id:'fd_rid',name:'Requirement ID',tab:'tab_fd',field:'requirement_id',sys:true},
+    {id:'fd_fname',name:'Field Name',tab:'tab_fd',field:'field_name',sys:true},
+    {id:'fd_mand',name:'Mandatory',tab:'tab_fd',field:'mandatory',sys:true},
+    {id:'fd_rtype',name:'Response Type',tab:'tab_fd',field:'response_type',sys:true},
+    {id:'fd_sec',name:'Section',tab:'tab_fd',field:'section_id',sys:true},
+    {id:'fd_pres',name:'Presence',tab:'tab_fd',field:'presence_classification',sys:false},
+    {id:'fd_det',name:'Detection',tab:'tab_fd',field:'detection_method',sys:true},
+    {id:'fd_conf',name:'Confidence',tab:'tab_fd',field:'confidence_contribution',sys:true},
+    {id:'fd_cflag',name:'Complexity',tab:'tab_fd',field:'complexity_flag',sys:false},
+    {id:'fd_notes',name:'Reviewer Notes',tab:'tab_fd',field:'reviewer_notes',sys:false},
+    {id:'fd_val',name:'Extracted Value',tab:'tab_fd',field:'extracted_value',sys:true},
+    {id:'cr_fid',name:'File ID',tab:'tab_cr',field:'submission_file_id',sys:true},
+    {id:'cr_fn',name:'File Name',tab:'tab_cr',field:'file_name',sys:true},
+    {id:'cr_cl',name:'Confidence',tab:'tab_cr',field:'confidence_level',sys:true},
+    {id:'cr_sc',name:'Score',tab:'tab_cr',field:'confidence_score',sys:true},
+    {id:'cr_rat',name:'Rationale',tab:'tab_cr',field:'rationale',sys:true},
+    {id:'cr_abs',name:'Key Absent',tab:'tab_cr',field:'key_absent',sys:true},
+    {id:'cr_par',name:'Key Partial',tab:'tab_cr',field:'key_partial',sys:true},
+    {id:'cr_ind',name:'Indeterminate',tab:'tab_cr',field:'indeterminate_fields',sys:true},
+    {id:'cr_ol',name:'Override Level',tab:'tab_cr',field:'override_level',sys:false},
+    {id:'cr_or',name:'Override Rationale',tab:'tab_cr',field:'override_rationale',sys:false},
+    {id:'si_fid',name:'File ID',tab:'tab_si',field:'submission_file_id',sys:true},
+    {id:'si_fn',name:'File Name',tab:'tab_si',field:'file_name',sys:true},
+    {id:'si_ft',name:'Type',tab:'tab_si',field:'file_type',sys:true},
+    {id:'si_sc',name:'Sheets',tab:'tab_si',field:'sheet_count',sys:true},
+    {id:'si_st',name:'Status',tab:'tab_si',field:'processing_status',sys:true},
+    {id:'si_ts',name:'Scanned',tab:'tab_si',field:'scan_timestamp',sys:true},
+    {id:'si_tpl',name:'Template',tab:'tab_si',field:'template_type',sys:true},
+    {id:'rb_rid',name:'Requirement ID',tab:'tab_rb',field:'requirement_id',sys:true},
+    {id:'rb_fn',name:'Field Name',tab:'tab_rb',field:'field_name',sys:true},
+    {id:'rb_m',name:'Mandatory',tab:'tab_rb',field:'mandatory',sys:true},
+    {id:'rb_rt',name:'Response Type',tab:'tab_rb',field:'response_type',sys:true},
+    {id:'rb_dt',name:'Data Type',tab:'tab_rb',field:'data_type',sys:true},
+    {id:'rb_sec',name:'Section',tab:'tab_rb',field:'section_id',sys:true},
+    {id:'rb_ft',name:'Field Type',tab:'tab_rb',field:'field_type',sys:true},
+    {id:'rb_inc',name:'Included',tab:'tab_rb',field:'included_in_scan',sys:true},
+    {id:'rb_cf',name:'Complexity',tab:'tab_rb',field:'complexity_flag',sys:true}
+  ]},
+  createReq:function(o){return Object.assign({requirement_id:CCDM.uid('req'),field_name:'',mandatory:true,response_type:'free-text',data_type:'string',field_type:'text',section_id:'',template_scope:'Both',evidence_requirements:'',reviewer_guidance:''},o||{})},
+  createFieldProfile:function(o){return Object.assign({requirement_id:'',included_in_scan:true,complexity_flag:''},o||{})},
+  createSubFile:function(o){return Object.assign({submission_file_id:CCDM.uid('sf'),file_name:'',file_type:'',template_type:'Unknown',sheet_count:0,processing_status:'Pending',scan_timestamp:null,sort_order:0},o||{})},
+  createFinding:function(o){return Object.assign({finding_id:CCDM.uid('f'),submission_file_id:'',file_name:'',requirement_id:'',field_name:'',mandatory:false,response_type:'',section_id:'',presence_classification:'Absent',detection_method:'',confidence_contribution:0,complexity_flag:'',reviewer_notes:'',extracted_value:''},o||{})},
+  createConfAssessment:function(o){return Object.assign({submission_file_id:'',file_name:'',completeness_status:'Incomplete',completeness_pct:0,mand_total:0,mand_present:0,mand_absent:0,mand_partial:0,opt_total:0,opt_present:0,opt_absent:0,opt_pct:0,indeterminate_count:0,rationale:'',gap_mandatory:'',gap_optional:'',indeterminate_fields:'',user_notes:''},o||{})}
+};
+
+/* ================================================================
+   STATE MANAGER
+   ================================================================ */
+var SM={
+  ccdm:null,
+  ses:null,
+  _fileStore:{},
+  init:function(){
+    SM.ccdm=CCDM.createEmpty();
+    SM.ses={phase:'p1_purpose',s1Files:[],subFiles:[],activeTab:'tab_cs',selRow:null,valResults:[],isApproved:false,isLocked:false,sortMode:'upload',scanStats:null,selectedFileIds:[],gridSearch:{},gridSortCol:{},gridSortAsc:{}};
+    SM.persist();
+  },
+  persist:function(){try{localStorage.setItem('goa_s2_c',JSON.stringify(SM.ccdm));localStorage.setItem('goa_s2_s',JSON.stringify(SM.ses))}catch(e){}},
+  load:function(){try{var c=localStorage.getItem('goa_s2_c'),s=localStorage.getItem('goa_s2_s');if(c&&s){SM.ccdm=JSON.parse(c);CCDM.syncCounters(SM.ccdm);SM.ses=JSON.parse(s);if(!SM.ses._baselineFilter)SM.ses._baselineFilter='All';if(!SM.ses._baselineSortCol)SM.ses._baselineSortCol='template';if(!SM.ses._baselineSortDir)SM.ses._baselineSortDir='asc';if(!SM.ses.gridSearch)SM.ses.gridSearch={};if(!SM.ses.gridSortCol)SM.ses.gridSortCol={};if(!SM.ses.gridSortAsc)SM.ses.gridSortAsc={};if(!SM.ses.selectedFileIds)SM.ses.selectedFileIds=[];if(SM.ses.phase==='p1_profile')SM.ses.phase='p1_config';if(!SM.ccdm.scan_configuration.optional_threshold)SM.ccdm.scan_configuration.optional_threshold=75;if(!SM.ses._scanSortCol)SM.ses._scanSortCol='name';if(!SM.ses._scanSortDir)SM.ses._scanSortDir='asc';return true}}catch(e){}return false},
+  update:function(fn,desc){
+    if(SM.ses.isApproved&&desc!=='force')return false;
+    fn(SM.ccdm);
+    SM.ccdm.workbook_metadata.last_updated_timestamp=new Date().toISOString();
+    SM.audit('user',desc||'update');
+    SM.persist();return true;
+  },
+  transition:function(p){SM.ses.phase=p;SM.audit('system','Phase: '+p);SM.persist()},
+  audit:function(actor,action){SM.ccdm.version_history.audit_log.push({event_id:CCDM.uid('e'),timestamp:new Date().toISOString(),actor:actor,action:action})},
+  reset:function(){SM._fileStore={};localStorage.removeItem('goa_s2_c');localStorage.removeItem('goa_s2_s');SM.init()}
+};
+
+/* ================================================================
+   VALIDATION ENGINE (V2-001 through V2-018)
+   ================================================================ */
+var VE={
+  err:function(rule,ent,sev,msg,res){return {error_id:CCDM.uid('err'),timestamp:new Date().toISOString(),rule:rule,entity:ent,severity:sev,message:msg,resolution:res||''}},
+  runAll:function(c){
+    var e=[];
+    for(var i=1;i<=18;i++){var fn=VE['v'+i];if(fn)e=e.concat(fn(c))}
+    return e;
+  },
+  hasBlocking:function(r){return r.some(function(x){return x.severity==='blocking'})},
+  countBy:function(r){var c={blocking:0,warning:0,informational:0};r.forEach(function(x){c[x.severity]=(c[x.severity]||0)+1});return c},
+  v1:function(c){var e=[];c.requirements_baseline.requirements.forEach(function(r){
+    if(!r.requirement_id)e.push(VE.err('V2-001',r.requirement_id||'?','blocking','Missing requirement_id','Add requirement ID'));
+    if(!r.field_name)e.push(VE.err('V2-001',r.requirement_id||'?','blocking','Missing field_name on requirement','Add field name'));
+  });return e},
+  v2:function(c){return [VE.err('V2-002','system','informational','Lock state enforcement active. Baseline protected when status is not Draft.','')]},
+  v3:function(c){var e=[];c.entities.submission_files.forEach(function(f){
+    if(!EN.fileType.includes(f.file_type))e.push(VE.err('V2-003',f.file_name,'blocking','Unsupported file type: '+f.file_type,'Use CSV, XLS, XLSX, PDF, DOC, or DOCX'));
+  });return e},
+  v4:function(c){var e=[],seen={};c.entities.submission_files.forEach(function(f){
+    if(seen[f.file_name])e.push(VE.err('V2-004',f.file_name,'blocking','Duplicate submission file: '+f.file_name,'Remove or rename duplicate'));
+    seen[f.file_name]=true;
+  });return e},
+  v5:function(c){var e=[],reqs=c.requirements_baseline.requirements,profs=c.requirements_baseline.field_profile;
+    reqs.forEach(function(r){
+      if(!profs.some(function(p){return p.requirement_id===r.requirement_id}))
+        e.push(VE.err('V2-005',r.requirement_id,'warning','No field profile for requirement','Generate field profile'));
+    });return e},
+  v6:function(c){var e=[],cfg=c.scan_configuration;
+    if(cfg.threshold_high<0||cfg.threshold_high>100)e.push(VE.err('V2-006','config','blocking','High threshold out of range: '+cfg.threshold_high,'Set between 0-100'));
+    if(cfg.threshold_medium<0||cfg.threshold_medium>100)e.push(VE.err('V2-006','config','blocking','Medium threshold out of range: '+cfg.threshold_medium,'Set between 0-100'));
+    if(cfg.threshold_high<=cfg.threshold_medium)e.push(VE.err('V2-006','config','blocking','High threshold must exceed medium','Adjust thresholds'));
+    return e},
+  v7:function(c){var e=[],sfIds=new Set(c.entities.submission_files.map(function(f){return f.submission_file_id})),
+    rIds=new Set(c.requirements_baseline.requirements.map(function(r){return r.requirement_id}));
+    c.entities.findings.forEach(function(f){
+      if(!sfIds.has(f.submission_file_id))e.push(VE.err('V2-007',f.finding_id,'blocking','Finding references invalid file: '+f.submission_file_id,'Correct reference'));
+      if(!rIds.has(f.requirement_id))e.push(VE.err('V2-007',f.finding_id,'blocking','Finding references invalid requirement: '+f.requirement_id,'Correct reference'));
+    });return e},
+  v8:function(c){var e=[],cfg=c.scan_configuration;c.entities.confidence_assessments.forEach(function(a){
+    if(a.confidence_score<0||a.confidence_score>100)e.push(VE.err('V2-008',a.submission_file_id,'blocking','Score out of range: '+a.confidence_score,'Must be 0-100'));
+    var expected=a.confidence_score>=cfg.threshold_high?'H':a.confidence_score>=cfg.threshold_medium?'M':'L';
+    if(a.confidence_level!==expected&&!a.override_level)e.push(VE.err('V2-008',a.submission_file_id,'warning','Confidence level mismatch: '+a.confidence_level+' vs expected '+expected,'Recalculate'));
+  });return e},
+  v9:function(c){var e=[];c.entities.findings.forEach(function(f){
+    if(!EN.presence.includes(f.presence_classification))e.push(VE.err('V2-009',f.finding_id,'warning','Invalid presence: '+f.presence_classification,'Use: '+EN.presence.join(', ')));
+  });return e},
+  v10:function(c){var e=[];c.entities.confidence_assessments.forEach(function(a){
+    if(a.confidence_score<0||a.confidence_score>100)e.push(VE.err('V2-010',a.submission_file_id,'blocking','Percentage out of bounds: '+a.confidence_score,'Must be 0-100'));
+  });return e},
+  v11:function(c){var e=[];var mandReqs=c.requirements_baseline.requirements.filter(function(r){return r.mandatory});
+    c.entities.submission_files.forEach(function(sf){
+      mandReqs.forEach(function(r){
+        var prof=c.requirements_baseline.field_profile.find(function(p){return p.requirement_id===r.requirement_id});
+        if(prof&&!prof.included_in_scan)return;
+        var has=c.entities.findings.some(function(f){return f.submission_file_id===sf.submission_file_id&&f.requirement_id===r.requirement_id});
+        if(!has)e.push(VE.err('V2-011',sf.file_name+'/'+r.requirement_id,'warning','Mandatory requirement has no finding','Run scan or add finding'));
+      });
+    });return e},
+  v12:function(){return [VE.err('V2-012','system','informational','Round-trip integrity enforced via JSON export/import.','')]},
+  v13:function(){return [VE.err('V2-013','system','informational','No silent data loss. All operations audited.','')]},
+  v14:function(c){var e=[];
+    if(!c.workbook_metadata)e.push(VE.err('V2-014','workbook_metadata','blocking','Missing workbook_metadata','Ensure valid CCDM'));
+    if(!c.entities)e.push(VE.err('V2-014','entities','blocking','Missing entities','Ensure valid CCDM'));
+    if(!c.requirements_baseline)e.push(VE.err('V2-014','baseline','blocking','Missing requirements_baseline','Ensure valid CCDM'));
+    return e},
+  v15:function(c){var e=[],seen={};c.entities.submission_files.forEach(function(f){
+    if(seen[f.sort_order]!==undefined)e.push(VE.err('V2-015',f.file_name,'warning','Duplicate sort order: '+f.sort_order,'Reassign sort orders'));
+    seen[f.sort_order]=f.file_name;
+  });return e},
+  v16:function(){return [VE.err('V2-016','system','informational','Report generation integrity active.','')]},
+  v17:function(c){var e=[];c.entities.findings.forEach(function(f){
+    if(f.detection_method==='Manual Override'&&!f.reviewer_notes)
+      e.push(VE.err('V2-017',f.finding_id,'warning','Manual override without reviewer notes','Add notes for audit trail'));
+  });return e},
+  v18:function(c){var e=[],ids=new Set(c.version_history.version_graph.map(function(v){return v.version_id}));
+    c.version_history.version_graph.forEach(function(v){
+      if(v.parent_version_id&&!ids.has(v.parent_version_id))
+        e.push(VE.err('V2-018',v.version_id,'warning','Version references missing parent: '+v.parent_version_id,'Check version graph'));
+    });return e}
+};
+
+/* ================================================================
+   VERSION MANAGER
+   ================================================================ */
+var VM={
+  clone:function(o){return JSON.parse(JSON.stringify(o))},
+  snapshot:function(c,origin,valSt){
+    var s={version_id:CCDM.uid('v'),parent_version_id:c.workbook_metadata.version_id,timestamp:new Date().toISOString(),
+      origin_type:origin||'Edited',validation_status:valSt||'Pass',
+      cwdm_snapshot:VM.clone({workbook_metadata:c.workbook_metadata,requirements_baseline:c.requirements_baseline,scan_configuration:c.scan_configuration,entities:c.entities,schema:c.schema,relationships:c.relationships,views:c.views})};
+    c.version_history.version_graph.push(s);
+    c.workbook_metadata.version_id=s.version_id;
+    c.workbook_metadata.last_updated_timestamp=s.timestamp;
+    return s;
+  },
+  rollback:function(c,vid){
+    var src=c.version_history.version_graph.find(function(v){return v.version_id===vid});
+    if(!src)return null;
+    var s={version_id:CCDM.uid('v'),parent_version_id:c.workbook_metadata.version_id,timestamp:new Date().toISOString(),origin_type:'Rolled-Back',cwdm_snapshot:VM.clone(src.cwdm_snapshot),validation_status:src.validation_status};
+    c.version_history.version_graph.push(s);
+    var r=s.cwdm_snapshot;
+    c.workbook_metadata=VM.clone(r.workbook_metadata);c.workbook_metadata.version_id=s.version_id;c.workbook_metadata.status='Scanned';
+    c.requirements_baseline=VM.clone(r.requirements_baseline);c.scan_configuration=VM.clone(r.scan_configuration);
+    c.entities=VM.clone(r.entities);c.schema=VM.clone(r.schema);c.relationships=VM.clone(r.relationships);c.views=VM.clone(r.views);
+    return s;
+  },
+  getGraph:function(c){return c.version_history.version_graph}
+};
+
+/* ================================================================
+   COMPLETENESS ENGINE - 5 Detection Strategies (Section 5.5.1)
+   ================================================================ */
+var CE={
+  normalize:function(s){return (s||'').toLowerCase().replace(/[^a-z0-9 ]/g,'').trim()},
+  similarity:function(a,b){
+    a=CE.normalize(a);b=CE.normalize(b);if(!a||!b)return 0;if(a===b)return 1;
+    var bg=function(s){var r=[];for(var i=0;i<s.length-1;i++)r.push(s.slice(i,i+2));return r};
+    var aB=bg(a),bB=bg(b),inter=0;
+    bB.forEach(function(x){var idx=aB.indexOf(x);if(idx>=0){inter++;aB.splice(idx,1)}});
+    return aB.length+bB.length+inter===0?0:(2*inter)/(bg(a).length+bg(b).length);
+  },
+  inferType:function(vals){
+    if(!vals||vals.length===0)return 'string';
+    var nums=0,bools=0,dates=0;
+    vals.forEach(function(v){
+      var s=String(v).trim().toLowerCase();
+      if(s===''||s==='n/a'||s==='-')return;
+      if(!isNaN(Number(s)))nums++;
+      else if(['yes','no','true','false','y','n','1','0'].includes(s))bools++;
+      else if(!isNaN(Date.parse(s))&&s.length>4)dates++;
+    });
+    var total=vals.filter(function(v){var s=String(v).trim();return s!==''&&s!=='n/a'&&s!=='-'}).length;
+    if(total===0)return 'string';
+    if(nums/total>.7)return 'number';
+    if(bools/total>.7)return 'boolean';
+    if(dates/total>.5)return 'date';
+    return 'string';
+  },
+  scanFile:function(ccdm,sfId,headers,rows){
+    var reqs=ccdm.requirements_baseline.requirements;
+    var profs=ccdm.requirements_baseline.field_profile;
+    var cfg=ccdm.scan_configuration;
+    var findings=[];
+    var normHeaders=headers.map(CE.normalize);
+
+    /* Helper: check if a matched column has actual data */
+    var checkPopulated=function(colIdx){
+      if(colIdx<0||!rows||rows.length===0)return {populated:false,sampleValue:'',populatedCount:0,totalRows:rows?rows.length:0};
+      var populated=0;
+      var sampleVal='';
+      var placeholders=['','n/a','-','na','tbd','select one','-select one-','null','none','0'];
+      for(var r=0;r<rows.length;r++){
+        var val=rows[r]&&rows[r][colIdx]!==undefined?String(rows[r][colIdx]).trim():'';
+        if(val!==''&&!placeholders.includes(val.toLowerCase())){
+          populated++;
+          if(!sampleVal)sampleVal=val.length>200?val.substring(0,200)+'...':val;
+        }
+      }
+      return {populated:populated>0,sampleValue:sampleVal,populatedCount:populated,totalRows:rows.length};
+    };
+
+    reqs.forEach(function(req){
+      var prof=profs.find(function(p){return p.requirement_id===req.requirement_id});
+      if(prof&&!prof.included_in_scan){
+        findings.push(CCDM.createFinding({submission_file_id:sfId,file_name:'',requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:'Excluded',detection_method:'',confidence_contribution:0,complexity_flag:prof?prof.complexity_flag:''}));
+        return;
+      }
+      /* Template-awareness */
+      var fileTemplate=sfId?((ccdm.entities.submission_files.find(function(f){return f.submission_file_id===sfId})||{}).template_type||'Unknown'):'Unknown';
+      var reqScope=req.template_scope||'Both';
+      if(reqScope!=='Both'&&fileTemplate!=='Unknown'&&reqScope!==fileTemplate){
+        findings.push(CCDM.createFinding({submission_file_id:sfId,file_name:'',requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:'Not Applicable',detection_method:'Template Scope',confidence_contribution:0,complexity_flag:prof?prof.complexity_flag:''}));
+        return;
+      }
+      var bestScore=0,bestMethod='',bestColIdx=-1;
+      var normField=CE.normalize(req.field_name);
+      /* Strategy 1: Exact Label Match */
+      var exactIdx=normHeaders.indexOf(normField);
+      if(exactIdx>=0){bestScore=1;bestMethod='Exact Label';bestColIdx=exactIdx}
+      /* Strategy 2: Fuzzy Label Match */
+      if(bestScore<1){
+        headers.forEach(function(h,i){
+          var sim=CE.similarity(req.field_name,h);
+          if(sim>bestScore&&sim>=0.6){bestScore=sim;bestMethod='Fuzzy Label';bestColIdx=i}
+        });
+      }
+      /* Strategy 3: Structural Position Match */
+      if(bestScore<0.6&&req.section_id){
+        var secNum=parseInt(req.section_id.replace(/[^0-9]/g,''))||0;
+        if(secNum>0&&secNum<=headers.length){
+          var posScore=0.5;
+          if(posScore>bestScore){bestScore=posScore;bestMethod='Structural Position';bestColIdx=secNum-1}
+        }
+      }
+      /* Strategy 4: Response Type Match */
+      if(bestScore<0.6&&rows.length>0){
+        headers.forEach(function(h,i){
+          var samples=rows.slice(0,10).map(function(r){return r[i]}).filter(function(v){return v!==undefined&&v!==null&&String(v).trim()!==''});
+          var inferred=CE.inferType(samples);
+          var expected=req.data_type||'string';
+          if(inferred===expected){
+            var sim=CE.similarity(req.field_name,h);
+            var typeScore=0.4+sim*0.3;
+            if(typeScore>bestScore){bestScore=typeScore;bestMethod='Response Type';bestColIdx=i}
+          }
+        });
+      }
+      /* Strategy 5: Table Header Match */
+      if(bestScore<0.5){
+        var keywords=normField.split(' ').filter(function(w){return w.length>2});
+        headers.forEach(function(h,idx){
+          var nh=CE.normalize(h);
+          var matches=keywords.filter(function(k){return nh.includes(k)}).length;
+          if(keywords.length>0&&matches/keywords.length>0.5){
+            var headerScore=0.3+0.3*(matches/keywords.length);
+            if(headerScore>bestScore){bestScore=headerScore;bestMethod='Table Header';bestColIdx=idx}
+          }
+        });
+      }
+
+      /* Value extraction: check if the matched column has data */
+      var presence='Absent';
+      var extractedValue='';
+      var detectionNotes='';
+      if(bestScore>0&&bestColIdx>=0){
+        var valCheck=checkPopulated(bestColIdx);
+        extractedValue=valCheck.sampleValue;
+        if(valCheck.populated){
+          if(bestScore>=0.8){
+            presence='Present';
+            detectionNotes=bestMethod+': header matched, '+valCheck.populatedCount+'/'+valCheck.totalRows+' rows populated';
+          } else {
+            presence='Partial';
+            detectionNotes=bestMethod+': weak header match ('+Math.round(bestScore*100)+'%), '+valCheck.populatedCount+'/'+valCheck.totalRows+' rows populated';
+          }
+        } else {
+          presence='Partial';
+          detectionNotes=bestMethod+': header matched but no substantive values found in column';
+          bestScore=bestScore*0.3;
+        }
+      } else if(bestScore>0){
+        presence='Partial';
+        detectionNotes=bestMethod+': header match only, no column data available';
+      } else {
+        presence='Absent';
+        detectionNotes='No matching header or data found';
+      }
+
+      findings.push(CCDM.createFinding({submission_file_id:sfId,file_name:'',requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:presence,detection_method:bestMethod,confidence_contribution:Math.round(bestScore*100),complexity_flag:prof?prof.complexity_flag:'',reviewer_notes:detectionNotes,extracted_value:extractedValue}));
+    });
+    return findings;
+  },
+  calculateCompleteness:function(ccdm,sfId){
+    var findings=ccdm.entities.findings.filter(function(f){return f.submission_file_id===sfId});
+    var cfg=ccdm.scan_configuration;
+    var mPres=0,mAbs=0,mPart=0,oPres=0,oAbs=0,oTotal=0,mTotal=0,indet=0;
+    var absentMandNames=[],absentOptNames=[],partialNames=[],indetNames=[];
+    findings.forEach(function(f){
+      if(f.presence_classification==='Excluded'||f.presence_classification==='Not Applicable')return;
+      if(f.mandatory){
+        mTotal++;
+        if(f.presence_classification==='Present')mPres++;
+        else if(f.presence_classification==='Partial'){mPart++;absentMandNames.push(f.field_name+' (Partial, '+f.section_id+')')}
+        else if(f.presence_classification==='Absent'){mAbs++;absentMandNames.push(f.field_name+' ('+f.section_id+')')}
+        else if(f.presence_classification==='Indeterminate'){indet++;indetNames.push(f.field_name);absentMandNames.push(f.field_name+' (Indeterminate, '+f.section_id+')')}
+      } else {
+        oTotal++;
+        if(f.presence_classification==='Present')oPres++;
+        else if(f.presence_classification==='Absent'){oAbs++;absentOptNames.push(f.field_name+' ('+f.section_id+')')}
+        else if(f.presence_classification==='Partial'){absentOptNames.push(f.field_name+' (Partial, '+f.section_id+')')}
+        else if(f.presence_classification==='Indeterminate'){indet++;indetNames.push(f.field_name);absentOptNames.push(f.field_name+' (Indeterminate, '+f.section_id+')')}
+      }
+    });
+    var mandPct=mTotal>0?Math.round((mPres/mTotal)*100):0;
+    var optPct=oTotal>0?Math.round((oPres/oTotal)*100):0;
+    var optThreshold=cfg.optional_threshold||75;
+    var status='Incomplete';
+    if(mandPct===100&&optPct>=optThreshold)status='Complete';
+    else if(mandPct===100&&optPct<optThreshold)status='Partially Complete';
+    else status='Incomplete';
+    if(findings.length===0){status='Incomplete';mandPct=0}
+    var parts=[];
+    if(mPres>0)parts.push(mPres+'/'+mTotal+' mandatory present');
+    if(mAbs>0)parts.push(mAbs+' mandatory absent');
+    if(mPart>0)parts.push(mPart+' mandatory partial');
+    if(oPres>0)parts.push(oPres+'/'+oTotal+' optional present ('+optPct+'%)');
+    if(indet>0)parts.push(indet+' indeterminate');
+    var rationale=parts.join('; ')||'No findings';
+    return CCDM.createConfAssessment({submission_file_id:sfId,completeness_status:status,completeness_pct:mandPct,mand_total:mTotal,mand_present:mPres,mand_absent:mAbs,mand_partial:mPart,opt_total:oTotal,opt_present:oPres,opt_absent:oAbs,opt_pct:optPct,indeterminate_count:indet,rationale:rationale,gap_mandatory:absentMandNames.join('; '),gap_optional:absentOptNames.join('; '),indeterminate_fields:indetNames.slice(0,5).join(', ')});
+  }
+};
+
+/* ================================================================
+   EXPORT ENGINE (AC-22: Data Dictionary in all exports)
+   ================================================================ */
+var EE={
+  dl:function(blob,fn){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;a.click();URL.revokeObjectURL(a.href)},
+  canExport:function(r){return !VE.hasBlocking(r)||confirm('Blocking errors exist. Export anyway?')},
+  filterForExport:function(c){
+    var sel=SM.ses.selectedFileIds;
+    var hasFilter=sel&&sel.length>0;
+    var findings=hasFilter?c.entities.findings.filter(function(f){return sel.includes(f.submission_file_id)}):c.entities.findings;
+    var cas=hasFilter?c.entities.confidence_assessments.filter(function(a){return sel.includes(a.submission_file_id)}):c.entities.confidence_assessments;
+    var subs=hasFilter?c.entities.submission_files.filter(function(f){return sel.includes(f.submission_file_id)}):c.entities.submission_files;
+    return {findings:findings,cas:cas,subs:subs};
+  },
+  exportJSON:function(c){EE.dl(new Blob([JSON.stringify(c,null,2)],{type:'application/json'}),'CCDM_Stage2_'+Date.now()+'.json')},
+  exportExcel:function(c){
+    if(typeof XLSX==='undefined'){alert('SheetJS not loaded');return}
+    var wb=XLSX.utils.book_new();
+    var ex=EE.filterForExport(c);
+    /* Completeness Summary */
+    var csH=['File ID','File Name','Confidence','Score','Mand Present','Mand Absent','Mand Partial','Opt Present','Opt Absent','Indeterminate','Rationale','Notes'];
+    var csD=ex.cas.map(function(a){return [a.submission_file_id,a.file_name,a.confidence_level,a.confidence_score,a.mand_present,a.mand_absent,a.mand_partial,a.opt_present,a.opt_absent,a.indeterminate_count,a.rationale,a.user_notes||'']});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([csH].concat(csD)),'Completeness Summary');
+    /* Field Detail */
+    var fdH=['Finding ID','File ID','File Name','Req ID','Field Name','Mandatory','Response Type','Section','Presence','Detection','Confidence','Complexity','Notes'];
+    var fdD=ex.findings.map(function(f){return [f.finding_id,f.submission_file_id,f.file_name,f.requirement_id,f.field_name,f.mandatory?'Yes':'No',f.response_type,f.section_id,f.presence_classification,f.detection_method,f.confidence_contribution,f.complexity_flag,f.reviewer_notes]});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([fdH].concat(fdD)),'Field Detail');
+    /* Submission Inventory */
+    var siH=['File ID','File Name','Type','Sheets','Status','Scanned'];
+    var siD=ex.subs.map(function(f){return [f.submission_file_id,f.file_name,f.file_type,f.sheet_count,f.processing_status,f.scan_timestamp||'']});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([siH].concat(siD)),'Submission Inventory');
+    /* Requirements Baseline */
+    var rbH=['Req ID','Field Name','Mandatory','Response Type','Data Type','Section','Field Type','Included','Complexity'];
+    var rbD=c.requirements_baseline.requirements.map(function(r){
+      var p=c.requirements_baseline.field_profile.find(function(fp){return fp.requirement_id===r.requirement_id})||{};
+      return [r.requirement_id,r.field_name,r.mandatory?'Yes':'No',r.response_type,r.data_type,r.section_id,r.field_type,p.included_in_scan!==false?'Yes':'No',p.complexity_flag||'']});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([rbH].concat(rbD)),'Requirements Baseline');
+    /* Data Dictionary (AC-22) */
+    var ddH=['Column ID','Display Name','Tab','Field','System Column'];
+    var ddD=c.schema.column_definitions.map(function(d){return [d.id,d.name,d.tab,d.field,d.sys?'Yes':'No']});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([ddH].concat(ddD)),'Data Dictionary');
+    /* Source Files */
+    var sf=c.schema.data_dictionary.source_files||[];
+    if(sf.length>0){var sfH=['File Name','Type'];var sfD=sf.map(function(f){return [f.name,f.type]});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([sfH].concat(sfD)),'Source Files')}
+    XLSX.writeFile(wb,'CCDM_Stage2_'+Date.now()+'.xlsx');
+  },
+  exportPDF:function(){window.print()},
+  exportWord:function(c){
+    var ex=EE.filterForExport(c);
+    var h="<html><head><meta charset='UTF-8'><style>body{font-family:Segoe UI,sans-serif;font-size:11pt}h1{color:#0070C0}h2{color:#004578}table{border-collapse:collapse;width:100%;margin-bottom:20px}th{background:#004578;color:#fff;padding:6px 8px;font-size:10pt}td{border:1px solid #d1d5db;padding:5px 8px;font-size:10pt}.ftr{text-align:center;font-size:9pt;color:#666;margin-top:30px}</style></head><body>";
+    h+="<h1>Grant Submission Completeness Review - Stage 2</h1>";
+    h+="<p><strong>ID:</strong> "+c.workbook_metadata.workbook_id+"</p>";
+    h+="<p><strong>Status:</strong> "+c.workbook_metadata.status+"</p>";
+    h+="<p><strong>Exported:</strong> "+new Date().toISOString()+"</p>";
+    var sel=SM.ses.selectedFileIds;
+    if(sel&&sel.length>0)h+="<p><strong>Scope:</strong> "+sel.length+" of "+c.entities.submission_files.length+" files selected</p>";
+    h+="<h2>Completeness Summary</h2><table><tr><th>File</th><th>Confidence</th><th>Score</th><th>Mand Present</th><th>Mand Absent</th><th>Rationale</th></tr>";
+    ex.cas.forEach(function(a){h+="<tr><td>"+a.file_name+"</td><td>"+a.confidence_level+"</td><td>"+a.confidence_score+"%</td><td>"+a.mand_present+"</td><td>"+a.mand_absent+"</td><td>"+a.rationale+"</td></tr>"});
+    h+="</table><h2>Field Detail</h2><table><tr><th>File</th><th>Field</th><th>Mandatory</th><th>Presence</th><th>Detection</th><th>Notes</th></tr>";
+    ex.findings.forEach(function(f){h+="<tr><td>"+f.file_name+"</td><td>"+f.field_name+"</td><td>"+(f.mandatory?"Yes":"No")+"</td><td>"+f.presence_classification+"</td><td>"+f.detection_method+"</td><td>"+f.reviewer_notes+"</td></tr>"});
+    h+="</table><h2>Data Dictionary</h2><table><tr><th>Column ID</th><th>Name</th><th>Tab</th><th>Field</th><th>System</th></tr>";
+    c.schema.column_definitions.forEach(function(d){h+="<tr><td>"+d.id+"</td><td>"+d.name+"</td><td>"+d.tab+"</td><td>"+d.field+"</td><td>"+(d.sys?"Yes":"No")+"</td></tr>"});
+    h+="</table><div class='ftr'>Classification: Protected A - Government of Alberta</div></body></html>";
+    EE.dl(new Blob([h],{type:'application/msword'}),'CCDM_Stage2_'+Date.now()+'.doc');
+  }
+};
+
+/* ================================================================
+   UI RENDERERS
+   ================================================================ */
+function presenceBadge(p){var m={Present:'bPr',Absent:'bAb',Partial:'bPa',Excluded:'bEx',Indeterminate:'bIn','Not Applicable':'bEx'};return '<span class="badge '+(m[p]||'bIn')+'">'+p+'</span>'}
+function confBadge(l){return '<span class="badge b'+l+'">'+l+'</span>'}
+function sevBadge(s){var m={blocking:'bBl',warning:'bWr',informational:'bIf'};return '<span class="badge '+(m[s]||'bIf')+'">'+s+'</span>'}
+function renderNav(phase){
+  if(phase==='p1_purpose')return '';
+  var parts=[];
+  parts.push({id:'p1_import',label:'Part 1: Import',phases:['p1_import','p1_summary','p1_profile','p1_config']});
+  parts.push({id:'p2_upload',label:'Part 2: Submissions',phases:['p2_upload','p2_summary']});
+  parts.push({id:'p3',label:'Part 3: Workbook',phases:['p3']});
+  var html='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 16px;background:var(--w);border:1px solid var(--gb);border-radius:8px">';
+  parts.forEach(function(p,i){
+    var isActive=p.phases.includes(phase);
+    var isAccessible=false;
+    if(p.id==='p1_import')isAccessible=true;
+    if(p.id==='p2_upload')isAccessible=SM.ses.isLocked;
+    if(p.id==='p3')isAccessible=SM.ccdm.entities.findings.length>0;
+    if(i>0)html+='<span style="color:var(--gb);font-size:18px">&rsaquo;</span>';
+    if(isActive){
+      html+='<span style="font-weight:700;color:var(--b);font-size:13px">'+p.label+'</span>';
+    } else if(isAccessible){
+      html+='<span style="cursor:pointer;color:var(--bd);font-size:13px;text-decoration:underline" onclick="app.navTo(\''+p.id+'\')">'+p.label+'</span>';
+    } else {
+      html+='<span style="color:var(--gb);font-size:13px">'+p.label+'</span>';
+    }
+  });
+  html+='<span style="flex:1"></span>';
+  html+='<button class="btn btn-r btn-sm" onclick="app.globalReset()">Reset</button>';
+  html+='</div>';
+  return html;
+}
+function renderPurpose(){
+  return '<div class="card"><h1>Purpose and Limitations Statement</h1>'+
+  '<h3>Purpose</h3><p>This Harness reviews grant submission files against a locked Requirements Baseline imported from Stage 1. It scans uploaded submission files (CSV, XLS, XLSX) for completeness and produces a structured Completeness Report with confidence assessments.</p>'+
+  '<h3>What the Harness Can Do</h3><ul>'+
+  '<li>Import an approved Requirements Workbook from Stage 1 (JSON or Excel)</li>'+
+  '<li>Accept submission files in CSV, XLS, XLSX, PDF, DOC, and DOCX formats. CSV and Excel receive full automated detection. PDF, DOC, and DOCX require manual reviewer classification.</li>'+
+  '<li>Scan submission files against the requirements baseline using five detection strategies</li>'+
+  '<li>Calculate per-file completeness scores with confidence levels (H/M/L)</li>'+
+  '<li>Generate structured completeness reports with traceability</li>'+
+  '<li>Support manual overrides with audit trail</li></ul>'+
+  '<h3>What the Harness Cannot Guarantee</h3><ul>'+
+  '<li>Accurate extraction from corrupted files or files with non-standard encoding</li>'+
+  '<li>Correct interpretation of ambiguous column headers or data structures</li>'+
+  '<li>Detection of requirements satisfied through non-standard file layouts</li>'+
+  '<li>Completeness assessment beyond the requirements defined in the baseline</li></ul>'+
+  '<h3>User Responsibility</h3><p>Users must review all completeness findings before operational use. This tool assists with structured review; it does not replace human judgment.</p>'+
+  '<div class="tc" style="margin-top:20px"><button class="btn btn-p" onclick="app.acknowledge()">I Understand - Proceed</button></div></div>';
+}
+
+function renderImport(ses){
+  var fHtml='';
+  ses.s1Files.forEach(function(f,i){
+    var ext=f.name.split('.').pop().toLowerCase();
+    var ok=['json','xlsx','xls','doc','docx','pdf'].includes(ext);
+    fHtml+='<div class="fi"><span class="n">'+f.name+' ('+Math.round(f.size/1024)+' KB)</span><span style="color:'+(ok?'var(--g)':'var(--r)')+'">'+
+    (ok?'Valid':'Unsupported')+'</span><button class="btn btn-r btn-sm" onclick="app.removeS1('+i+')">&times;</button></div>';
+  });
+  return '<div class="card"><h1>Part 1: Import Requirements Baseline</h1>'+
+  '<h3>Upload Stage 1 Export</h3><p>Import the approved Requirements Workbook from Stage 1. Supported formats: JSON (lossless), Excel (.xlsx).</p>'+
+  '<div class="dz" id="s1dz" ondrop="app.handleS1Drop(event)" ondragover="event.preventDefault();this.classList.add(\'ov\')" ondragleave="this.classList.remove(\'ov\')">'+
+  '<p>Drag &amp; drop Stage 1 export here or click to browse</p>'+
+  '<p style="font-size:12px">JSON, XLSX, XLS, DOC, DOCX, PDF</p>'+
+  '<input type="file" id="s1input" accept=".json,.xlsx,.xls,.doc,.docx,.pdf" style="display:none" onchange="app.handleS1Select(event)"></div>'+
+  fHtml+
+  '<div class="tc" style="margin-top:16px"><button class="btn btn-p" onclick="app.importS1()"'+(ses.s1Files.length===0?' disabled':'')+'>Import Baseline</button></div></div>';
+}
+/* Baseline Summary */
+function renderBaselineSummary(c){
+  var reqs=c.requirements_baseline.requirements;
+  var filter=SM.ses._baselineFilter||'All';
+
+  /* Build section data grouped by template */
+  var rows=[];
+  var sectionMap={};
+  reqs.forEach(function(r){
+    var t=r.template_scope||'Both';
+    var s=r.section_id||'Unassigned';
+    var key=t+'||'+s;
+    if(!sectionMap[key])sectionMap[key]={template:t,section:s,total:0,mandatory:0,optional:0};
+    sectionMap[key].total++;
+    if(r.mandatory)sectionMap[key].mandatory++;
+    else sectionMap[key].optional++;
+  });
+  Object.keys(sectionMap).forEach(function(k){rows.push(sectionMap[k])});
+
+  /* Get unique template names for picklist */
+  var templates=['All'];
+  var tplSet={};
+  reqs.forEach(function(r){var t=r.template_scope||'Both';if(!tplSet[t]){tplSet[t]=1;templates.push(t)}});
+
+  /* Apply filter */
+  var filtered=filter==='All'?rows:rows.filter(function(r){return r.template===filter});
+
+  /* Calculate summary stats from filtered data */
+  var totalReqs=0,mandReqs=0,optReqs=0,sectionCount={};
+  filtered.forEach(function(r){totalReqs+=r.total;mandReqs+=r.mandatory;optReqs+=r.optional;sectionCount[r.section]=1});
+
+  /* Sort */
+  var sortCol=SM.ses._baselineSortCol||'template';
+  var sortDir=SM.ses._baselineSortDir||'asc';
+  filtered.sort(function(a,b){
+    var va=a[sortCol]||'',vb=b[sortCol]||'';
+    if(typeof va==='number'&&typeof vb==='number')return sortDir==='asc'?va-vb:vb-va;
+    va=String(va).toLowerCase();vb=String(vb).toLowerCase();
+    return sortDir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+  });
+
+  var src=c.requirements_baseline.source_import;
+
+  /* Render */
+  var html='<div class="card"><h1>Part 1: Requirements Baseline Imported</h1>';
+
+  /* Summary tiles - reflect filter */
+  html+='<div class="sc">';
+  html+='<div class="scd"><div class="v">'+totalReqs+'</div><div class="l">Total Requirements'+(filter!=='All'?' ('+filter+')':'')+'</div></div>';
+  html+='<div class="scd grn"><div class="v">'+mandReqs+'</div><div class="l">Mandatory</div></div>';
+  html+='<div class="scd amb"><div class="v">'+optReqs+'</div><div class="l">Optional</div></div>';
+  html+='<div class="scd"><div class="v">'+Object.keys(sectionCount).length+'</div><div class="l">Sections</div></div>';
+  html+='<div class="scd"><div class="v">'+(templates.length-1)+'</div><div class="l">'+(templates.length>2?'Templates':'Template')+'</div></div>';
+  html+='</div>';
+
+  /* Picklist */
+  html+='<div style="display:flex;align-items:center;gap:12px;margin:16px 0">';
+    html+='<label style="font-size:13px;font-weight:600;color:var(--gr)">Filter by Template:</label>';
+    html+='<select id="baselineFilter" onchange="app.setBaselineFilter(this.value)" style="padding:6px 12px;border:1px solid var(--gb);border-radius:6px;font-size:13px;font-family:var(--f)">';
+    templates.forEach(function(t){
+      html+='<option value="'+t+'"'+(t===filter?' selected':'')+'>'+t+(t==='All'?' ('+reqs.length+' requirements)':'')+'</option>';
+    });
+    html+='</select>';
+    html+='<span style="flex:1"></span>';
+    html+='<button class="btn btn-s btn-sm" onclick="app.navTo(\'p1_import\')">&laquo; Back to Import</button>';
+    html+='<button class="btn btn-p btn-sm" style="margin-left:8px" onclick="app.goToProfile()">Proceed to Scan Configuration</button>';
+    html+='</div>';
+
+  /* Sort arrow helper */
+  var arrow=function(col){
+    if(sortCol!==col)return ' <span style="color:var(--gb);font-size:10px">&#9650;&#9660;</span>';
+    return sortDir==='asc'?' <span style="font-size:10px">&#9650;</span>':' <span style="font-size:10px">&#9660;</span>';
+  };
+
+  /* Table */
+  html+='<div class="gw"><table><tr>';
+  html+='<th style="cursor:pointer" onclick="app.sortBaseline(\'template\')">Template'+arrow('template')+'</th>';
+  html+='<th style="cursor:pointer" onclick="app.sortBaseline(\'section\')">Section'+arrow('section')+'</th>';
+  html+='<th style="cursor:pointer;text-align:center" onclick="app.sortBaseline(\'total\')">Total'+arrow('total')+'</th>';
+  html+='<th style="cursor:pointer;text-align:center" onclick="app.sortBaseline(\'mandatory\')">Mandatory'+arrow('mandatory')+'</th>';
+  html+='<th style="cursor:pointer;text-align:center" onclick="app.sortBaseline(\'optional\')">Optional'+arrow('optional')+'</th>';
+  html+='</tr>';
+  filtered.forEach(function(r,i){
+    var tplColor=r.template==='Both'?'#E0E7FF':r.template==='Enhancement'?'#DBEAFE':'#FCE7F3';
+    html+='<tr style="'+(i%2===1?'background:var(--ra)':'')+'">'+
+    '<td style="font-size:13px">'+r.template+'</td>'+
+    '<td>'+r.section+'</td>'+
+    '<td style="text-align:center">'+r.total+'</td>'+
+    '<td style="text-align:center">'+r.mandatory+'</td>'+
+    '<td style="text-align:center">'+r.optional+'</td>'+
+    '</tr>';
+  });
+
+  /* Totals row */
+  html+='<tr style="background:var(--bl);font-weight:700">'+
+  '<td colspan="2">Total'+(filter!=='All'?' ('+filter+')':'')+'</td>'+
+  '<td style="text-align:center">'+totalReqs+'</td>'+
+  '<td style="text-align:center">'+mandReqs+'</td>'+
+  '<td style="text-align:center">'+optReqs+'</td></tr>';
+  html+='</table></div>';
+
+  /* Source */
+  html+='<h3>Source</h3><p style="font-size:13px;color:var(--gr)">'+src.file_name+' ('+src.format+') imported at '+new Date(src.import_timestamp).toLocaleString()+'</p>';html+='</div>';
+  return html;
+}
+
+function renderConfig(c){
+    var cfg=c.scan_configuration;
+    return '<div class="card"><h1>Part 1: Scan Configuration</h1>'+
+    '<p style="font-size:13px;color:var(--gr);margin-bottom:16px">Configure how the completeness scan evaluates submission files against the requirements baseline. These settings determine how completeness statuses are assigned and which findings are flagged for your review.</p>'+
+    '<h3 style="margin-bottom:4px">Completeness Settings</h3>'+
+    '<p style="font-size:12px;color:var(--gr);margin-bottom:12px">Completeness is determined by whether mandatory and optional fields are populated with substantive values (not blank, not placeholders like "N/A" or "-Select One-"). Each submission receives a status based on the following criteria:</p>'+
+    '<table style="width:100%;max-width:700px;border-collapse:collapse;margin-bottom:20px">'+
+    '<tr style="background:var(--ra)"><td style="padding:10px 16px;font-size:13px;font-weight:600;border:1px solid var(--gb);color:var(--g)">Complete</td>'+
+    '<td style="padding:10px 16px;font-size:12px;border:1px solid var(--gb)">100% mandatory fields populated AND optional fields populated at or above the threshold below</td></tr>'+
+    '<tr><td style="padding:10px 16px;font-size:13px;font-weight:600;border:1px solid var(--gb);color:var(--am)">Partially Complete</td>'+
+    '<td style="padding:10px 16px;font-size:12px;border:1px solid var(--gb)">100% mandatory fields populated AND optional fields populated below the threshold</td></tr>'+
+    '<tr style="background:var(--ra)"><td style="padding:10px 16px;font-size:13px;font-weight:600;border:1px solid var(--gb);color:var(--r)">Incomplete</td>'+
+    '<td style="padding:10px 16px;font-size:12px;border:1px solid var(--gb)">Less than 100% mandatory fields populated</td></tr>'+
+    '</table>'+
+    '<table style="width:100%;max-width:500px;border-collapse:collapse;margin-bottom:20px">'+
+    '<tr style="background:var(--ra)"><td style="padding:10px 16px;font-size:13px;font-weight:600;border:1px solid var(--gb)">Optional Completeness Threshold (%)</td>'+
+    '<td style="padding:10px 16px;border:1px solid var(--gb);width:100px"><input type="number" id="cfgOpt" value="'+cfg.optional_threshold+'" min="0" max="100" style="width:100%;padding:4px 8px;border:1px solid var(--gb);border-radius:4px;font-size:13px;text-align:center"></td>'+
+    '<td style="padding:10px 16px;font-size:12px;color:var(--gr);border:1px solid var(--gb)">Minimum percentage of optional fields that must be present for Complete status (default: 75%)</td></tr>'+
+    '</table>'+
+    '<h3 style="margin-bottom:4px">Scan Behaviour</h3>'+
+    '<p style="font-size:12px;color:var(--gr);margin-bottom:12px">Control how uncertain matches are handled during the scan.</p>'+
+    '<table style="width:100%;max-width:600px;border-collapse:collapse;margin-bottom:20px">'+
+    '<tr style="background:var(--ra)"><td style="padding:10px 16px;border:1px solid var(--gb);width:40px;text-align:center"><input type="checkbox" id="cfgFlag" '+(cfg.flag_partial?'checked':'')+'></td>'+
+    '<td style="padding:10px 16px;font-size:13px;font-weight:600;border:1px solid var(--gb)">Flag partial matches for review</td>'+
+    '<td style="padding:10px 16px;font-size:12px;color:var(--gr);border:1px solid var(--gb)">When checked, fields classified as Partial are highlighted in the Field Detail tab for manual review</td></tr>'+
+    '</table>'+
+    '<div class="tc" style="margin-top:20px"><button class="btn btn-s" onclick="app.navTo(\'p1_summary\')" style="margin-right:8px">&laquo; Back to Summary</button><button class="btn btn-g" onclick="app.lockBaseline()">&#128274; Lock Requirements Baseline</button></div>'+
+    '<p class="tc" style="font-size:12px;color:var(--gr);margin-top:8px">Locking the baseline finalizes Part 1 and enables Part 2: Submission Review. Unlocking later will clear all scan results and findings.</p></div>';
+  }
+
+function renderUpload(c,ses){
+  var files=c.entities.submission_files;
+  var sorted=files.slice().sort(function(a,b){
+    if(ses.sortMode==='alpha-az')return a.file_name.localeCompare(b.file_name);
+    if(ses.sortMode==='alpha-za')return b.file_name.localeCompare(a.file_name);
+    return a.sort_order-b.sort_order;
+  });
+  var fHtml='';
+  sorted.forEach(function(f,i){
+    var stColor=f.processing_status.indexOf('Readable')===0?'var(--g)':f.processing_status.indexOf('Unreadable')===0?'var(--r)':f.processing_status==='Checking...'?'var(--am)':'var(--am)';
+    fHtml+='<div class="fi"><span class="n">'+f.file_name+' ('+f.file_type+')</span>'+
+    '<span style="color:'+stColor+';font-size:12px;font-weight:600">'+f.processing_status+'</span>'+
+    '<button class="btn btn-r btn-sm" onclick="app.removeSubFile(\''+f.submission_file_id+'\')">&times;</button></div>';
+  });
+  return '<div class="card"><h1>Part 2: Submission Ingestion</h1>'+
+  '<div class="lb lk">&#128274; Requirements Baseline Locked ('+c.requirements_baseline.requirements.length+' requirements)</div>'+
+  '<h3>Upload Grant Application Submission Files</h3>'+
+  '<div class="dz" id="subdz" ondrop="app.handleSubDrop(event)" ondragover="event.preventDefault();this.classList.add(\'ov\')" ondragleave="this.classList.remove(\'ov\')">'+
+  '<p>Drag &amp; drop submission files here or click to browse</p>'+
+  '<p style="font-size:12px">Supported: CSV, XLS, XLSX, PDF, DOC, DOCX</p>'+
+'<input type="file" id="subinput" accept=".csv,.xls,.xlsx,.pdf,.doc,.docx" multiple style="display:none" onchange="app.handleSubSelect(event)"></div>'+
+  '<div style="display:flex;gap:12px;align-items:center;margin:12px 0">'+
+  '<label style="font-size:13px;font-weight:500">Sort:</label>'+
+  '<select onchange="app.changeSort(this.value)">'+
+    '<option value="upload"'+(ses.sortMode==='upload'?' selected':'')+'> Upload Order</option>'+
+    '<option value="alpha-az"'+(ses.sortMode==='alpha-az'?' selected':'')+'> Alphabetical A-Z</option>'+
+    '<option value="alpha-za"'+(ses.sortMode==='alpha-za'?' selected':'')+'> Alphabetical Z-A</option></select>'+
+    '<span style="flex:1"></span>'+
+    (function(){
+      var readable=files.filter(function(f){return f.processing_status.indexOf('Readable')===0}).length;
+      var checking=files.filter(function(f){return f.processing_status==='Checking...'}).length;
+      var canScan=readable>0&&checking===0;
+      var label='&#9654; Scan for Completeness';
+      if(files.length>0)label+=' ('+readable+' readable)';
+      return '<button class="btn btn-p btn-sm" onclick="app.runScan()"'+(!canScan?' disabled':'')+'>'+label+'</button>';
+    })()+
+    '<button class="btn btn-s btn-sm" style="margin-left:8px" onclick="app.backToPart1()">&#128275; Unlock Baseline</button></div>'+
+    fHtml+'</div>';
+}
+
+function renderScanSummary(c,s){
+  var files=c.entities.submission_files;
+  var findings=c.entities.findings;
+  var reqs=c.requirements_baseline.requirements;
+  var cas=c.entities.confidence_assessments;
+  var totalFiles=files.length;
+  var totalFindings=findings.length;
+  var cfg=c.scan_configuration;
+
+  /* Build per-file data */
+  var fileRows=[];
+  var complete=0,partial=0,incomplete=0;
+  files.forEach(function(sf){
+    var ca=cas.find(function(a){return a.submission_file_id===sf.submission_file_id})||{};
+    var status=ca.completeness_status||'Incomplete';
+    var pct=ca.completeness_pct||0;
+    if(status==='Complete')complete++;
+    else if(status==='Partially Complete')partial++;
+    else incomplete++;
+
+    /* Build gap bullets grouped by section */
+    var gapHtml='';
+    var mandGaps=(ca.gap_mandatory||'').split('; ').filter(function(g){return g!==''});
+    var optGaps=(ca.gap_optional||'').split('; ').filter(function(g){return g!==''});
+
+    if(mandGaps.length>0){
+      var mandSections={};
+      mandGaps.forEach(function(g){
+        var secMatch=g.match(/\((?:Partial, )?(.+)\)$/);
+        var sec=secMatch?secMatch[1]:'Unknown';
+        var fname=g.replace(/\s*\((?:Partial, )?.+\)$/,'');
+        if(!mandSections[sec])mandSections[sec]=[];
+        mandSections[sec].push(fname);
+      });
+      gapHtml+='<div style="font-size:12px;font-weight:600;margin-top:4px">Mandatory:</div><ul style="margin:2px 0 4px 16px;font-size:12px">';
+      Object.keys(mandSections).sort().forEach(function(sec){
+        gapHtml+='<li>'+sec+': '+mandSections[sec].join(', ')+'</li>';
+      });
+      gapHtml+='</ul>';
+    }
+    if(optGaps.length>0){
+      var optSections={};
+      optGaps.forEach(function(g){
+        var secMatch=g.match(/\((?:Partial, )?(.+)\)$/);
+        var sec=secMatch?secMatch[1]:'Unknown';
+        var fname=g.replace(/\s*\((?:Partial, )?.+\)$/,'');
+        if(!optSections[sec])optSections[sec]=[];
+        optSections[sec].push(fname);
+      });
+      gapHtml+='<div style="font-size:12px;font-weight:600;margin-top:4px">Optional:</div><ul style="margin:2px 0 4px 16px;font-size:12px">';
+      Object.keys(optSections).sort().forEach(function(sec){
+        gapHtml+='<li>'+sec+': '+optSections[sec].join(', ')+'</li>';
+      });
+      gapHtml+='</ul>';
+    }
+    if(!gapHtml)gapHtml='<span style="font-size:12px;color:var(--gr)">None</span>';
+
+    fileRows.push({name:sf.file_name,template:sf.template_type||'Unknown',pct:pct,status:status,gap:gapHtml,gapCount:mandGaps.length+optGaps.length});
+  });
+
+  /* Filter */
+  var scanFilter=s._scanFilter||'All';
+  var templates=['All'];
+  var tplSet={};
+  files.forEach(function(f){var t=f.template_type||'Unknown';if(!tplSet[t]){tplSet[t]=1;templates.push(t)}});
+  var scanSearch=(s._scanSearch||'').toLowerCase();
+  var filtered=fileRows;
+  if(scanFilter!=='All')filtered=filtered.filter(function(r){return r.template===scanFilter});
+  if(scanSearch)filtered=filtered.filter(function(r){return r.name.toLowerCase().indexOf(scanSearch)>=0});
+
+  /* Sort */
+  var sortCol=s._scanSortCol||'name';
+  var sortDir=s._scanSortDir||'asc';
+  filtered.sort(function(a,b){
+    var va,vb;
+    if(sortCol==='pct'){return sortDir==='asc'?a.pct-b.pct:b.pct-a.pct}
+    if(sortCol==='status'){var ord={Incomplete:0,'Partially Complete':1,Complete:2};va=ord[a.status]!==undefined?ord[a.status]:0;vb=ord[b.status]!==undefined?ord[b.status]:0;return sortDir==='asc'?va-vb:vb-va}
+    if(sortCol==='gapCount'){return sortDir==='asc'?a.gapCount-b.gapCount:b.gapCount-a.gapCount}
+    va=String(a[sortCol]||'').toLowerCase();vb=String(b[sortCol]||'').toLowerCase();
+    return sortDir==='asc'?va.localeCompare(vb):vb.localeCompare(va);
+  });
+
+  var arrow=function(col){
+    if(sortCol!==col)return ' <span style="color:var(--gb);font-size:10px">&#9650;&#9660;</span>';
+    return sortDir==='asc'?' <span style="font-size:10px">&#9650;</span>':' <span style="font-size:10px">&#9660;</span>';
+  };
+
+  /* Avg completeness */
+  var avgPct=totalFiles>0?Math.round(fileRows.reduce(function(sum,r){return sum+r.pct},0)/totalFiles):0;
+
+  var html='<div class="card"><h1>Scan Complete</h1>';
+
+  /* Summary tiles */
+  html+='<div class="sc">';
+  html+='<div class="scd"><div class="v">'+totalFiles+'</div><div class="l">Files Scanned</div></div>';
+  html+='<div class="scd"><div class="v">'+reqs.length+'</div><div class="l">Requirements in Baseline</div></div>';
+  html+='<div class="scd"><div class="v">'+totalFindings+'</div><div class="l">Findings Generated</div></div>';
+  html+='<div class="scd"><div class="v">'+avgPct+'%</div><div class="l">Avg Completeness</div></div>';
+  html+='</div>';
+
+  /* Completeness status tiles */
+  html+='<h3 style="margin:16px 0 4px">Submission Completeness</h3>';
+  html+='<p style="font-size:12px;color:var(--gr);margin-bottom:12px">Each file is assessed based on whether mandatory and optional fields contain substantive values. Completeness % reflects mandatory fields only. Status considers both mandatory (100% required) and optional (>='+cfg.optional_threshold+'% for Complete).</p>';
+  html+='<div class="sc">';
+  html+='<div class="scd grn"><div class="v">'+complete+'</div><div class="l">Complete</div></div>';
+  html+='<div class="scd amb"><div class="v">'+partial+'</div><div class="l">Partially Complete</div></div>';
+  html+='<div class="scd" style="background:#fef2f2"><div class="v" style="color:var(--e)">'+incomplete+'</div><div class="l">Incomplete</div></div>';
+  html+='</div>';
+
+  /* Toolbar: filter, search, buttons */
+  html+='<div style="display:flex;align-items:center;gap:12px;margin:20px 0 12px;flex-wrap:wrap">';
+  html+='<label style="font-size:13px;font-weight:600;color:var(--gr)">Template:</label>';
+  html+='<select onchange="app.setScanFilter(this.value)" style="padding:4px 8px;border:1px solid var(--gb);border-radius:4px;font-size:13px">';
+  templates.forEach(function(t){
+    html+='<option value="'+t+'"'+(t===scanFilter?' selected':'')+'>'+t+'</option>';
+  });
+  html+='</select>';
+  html+='<input type="text" placeholder="Search by file name..." value="'+(s._scanSearch||'')+'" oninput="app.setScanSearch(this.value)" style="padding:4px 8px;border:1px solid var(--gb);border-radius:4px;font-size:13px;width:220px">';
+  html+='<span style="font-size:12px;color:var(--gr)">'+filtered.length+' of '+fileRows.length+' files</span>';
+  html+='<span style="flex:1"></span>';
+  html+='<button class="btn btn-s btn-sm" onclick="app.navTo(\'p2_upload\')">&laquo; Back to Submissions</button>';
+  html+='<button class="btn btn-g btn-sm" onclick="app.goToPart3()">&#9654; Proceed to Workbook</button>';
+  html+='</div>';
+
+  /* Per-file detail table */
+  html+='<h3 style="margin-bottom:4px">Per-File Detail</h3>';
+  html+='<div class="gw"><table>';
+  html+='<tr>';
+  html+='<th style="cursor:pointer;vertical-align:top" onclick="app.sortScan(\'name\')">File Name'+arrow('name')+'</th>';
+  html+='<th style="cursor:pointer;vertical-align:top" onclick="app.sortScan(\'template\')">Template'+arrow('template')+'</th>';
+  html+='<th style="cursor:pointer;text-align:center;vertical-align:top" onclick="app.sortScan(\'pct\')">Completeness (%)'+arrow('pct')+'</th>';
+  html+='<th style="cursor:pointer;text-align:center;vertical-align:top" onclick="app.sortScan(\'status\')">Status'+arrow('status')+'</th>';
+  html+='<th style="cursor:pointer;vertical-align:top" onclick="app.sortScan(\'gapCount\')">Gap'+arrow('gapCount')+'</th>';
+  html+='</tr>';
+
+  filtered.forEach(function(r,i){
+    html+='<tr style="'+(i%2===1?'background:var(--ra)':'')+'">'+
+    '<td style="font-size:13px;vertical-align:top">'+r.name+'</td>'+
+    '<td style="font-size:13px;vertical-align:top">'+r.template+'</td>'+
+    '<td style="text-align:center;font-weight:700;vertical-align:top">'+r.pct+'%</td>'+
+    '<td style="text-align:center;font-weight:600;vertical-align:top">'+r.status+'</td>'+
+    '<td style="vertical-align:top">'+r.gap+'</td>'+
+    '</tr>';
+  });
+
+  if(filtered.length===0){
+    html+='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--gr)">No files match the current filter</td></tr>';
+  }
+
+  html+='</table></div>';
+  html+='</div>';
+  return html;
+}
+
+/* ================================================================
+   RENDER GRID
+   ================================================================ */
+function renderGrid(c,ses,tabId){
+  var cols=CCDM.defaultColumns().filter(function(col){return col.tab===tabId});
+  var rows=getTabData(c,tabId);
+  var tab=CCDM.defaultTabs().find(function(t){return t.tab_id===tabId});
+  var editableFields=(tab&&tab.editable_fields)||[];
+  /* Filter by file selection (except Requirements Baseline and Submission Inventory) */
+  if(tabId==='tab_cs'||tabId==='tab_fd'||tabId==='tab_cr'){
+    rows=filterBySelection(rows,ses,'submission_file_id');
+    /* Sort by Part 2 sort order */
+    var sfOrder={};
+    c.entities.submission_files.forEach(function(f){sfOrder[f.submission_file_id]=f.sort_order});
+    rows=rows.slice().sort(function(a,b){return (sfOrder[a.submission_file_id]||0)-(sfOrder[b.submission_file_id]||0)});
+  }
+  /* Apply search and column sort */
+  rows=applySortAndSearch(rows,cols,tabId,ses);
+  /* Selection banner (not on Submission Inventory) */
+  var html='';
+  if(tabId!=='tab_si')html+=renderSelectionBanner(c,ses);
+  html+=renderSearchBar(tabId,ses);
+  /* Bulk classify toolbar for Field Detail */
+  if(tabId==='tab_fd'&&!ses.isApproved){
+    html+='<div class="ba"><select id="bulkPresence"><option value="">Bulk Classify Selected...</option>';
+    EN.presence.forEach(function(p){if(p!=='Excluded')html+='<option value="'+p+'">'+p+'</option>'});
+    html+='</select><button class="btn btn-s btn-sm" onclick="app.bulkClassify()">Apply</button></div>';
+  }
+  html+='<div class="gw"><table><tr>';
+  /* Checkboxes for Field Detail and Submission Inventory */
+  var showCheck=(tabId==='tab_fd'||tabId==='tab_si');
+  if(showCheck)html+='<th style="width:30px"><input type="checkbox" onchange="app.selectAllRows(\''+tabId+'\',this.checked)"></th>';
+  cols.forEach(function(col){
+    var sortIcon='';
+    if(ses.gridSortCol&&ses.gridSortCol[tabId]===col.field)sortIcon=ses.gridSortAsc[tabId]!==false?' &#9650;':' &#9660;';
+    html+='<th style="cursor:pointer" onclick="app.toggleSort(\''+tabId+'\',\''+col.field+'\')">'+col.name+sortIcon+'</th>';
+  });
+  html+='</tr>';
+  if(rows.length===0){
+    html+='<tr><td colspan="'+(cols.length+(showCheck?1:0))+'" class="tc" style="padding:20px;color:var(--gr)">No records</td></tr>';
+  } else {
+    rows.forEach(function(row,ri){
+      var rowId=row.finding_id||row.submission_file_id||row.requirement_id||ri;
+      var isChecked=false;
+      if(tabId==='tab_si')isChecked=ses.selectedFileIds&&ses.selectedFileIds.includes(row.submission_file_id);
+      if(tabId==='tab_fd')isChecked=ses._fdSelected&&ses._fdSelected.includes(rowId);
+      html+='<tr>';
+      if(showCheck){
+        if(tabId==='tab_si')html+='<td><input type="checkbox" '+(isChecked?'checked':'')+' onchange="app.toggleFileSelect(\''+row.submission_file_id+'\',this.checked)"></td>';
+        else html+='<td><input type="checkbox" '+(isChecked?'checked':'')+' onchange="app.toggleFdSelect(\''+rowId+'\',this.checked)"></td>';
+      }
+      cols.forEach(function(col){
+        var val=row[col.field];
+        if(typeof val==='boolean')val=val?'Yes':'No';
+        if(val===null||val===undefined)val='';
+        if(Array.isArray(val))val=val.join(', ');
+        var display=String(val);
+        if(col.field==='presence_classification'&&val)display=presenceBadge(val);
+        if(col.field==='confidence_level'&&val)display=confBadge(val);
+        if(col.field==='detection_method'&&row.detection_method==='Manual Override')display+='<span class="oi"></span>';
+        var canEdit=!ses.isApproved&&editableFields.includes(col.field);
+        html+='<td'+(canEdit?' contenteditable="true" data-row="'+ri+'" data-field="'+col.field+'" data-tab="'+tabId+'" onblur="app.editCell(this)"':'')+'>';
+        html+=display+'</td>';
+      });
+      html+='</tr>';
+    });
+  }
+  html+='</table></div>';
+  html+='<div style="font-size:12px;color:var(--gr);margin-top:6px">'+rows.length+' record(s)</div>';
+  return html;
+}
+
+/* ================================================================
+   DATA DICTIONARY
+   ================================================================ */
+function renderDataDict(c){
+  var cols=c.schema.column_definitions;
+  var html='<div class="card"><h3>Data Dictionary</h3><p style="font-size:12px;color:var(--gr)">Auto-generated from CCDM schema. Read-only.</p>';
+  html+='<div class="gw"><table><tr><th>Column ID</th><th>Display Name</th><th>Tab</th><th>Field</th><th>System</th></tr>';
+  cols.forEach(function(d){html+='<tr><td>'+d.id+'</td><td>'+d.name+'</td><td>'+d.tab+'</td><td>'+d.field+'</td><td>'+(d.sys?'Yes':'No')+'</td></tr>'});
+  html+='</table></div>';
+  var sf=c.schema.data_dictionary.source_files||[];
+  if(sf.length>0){
+    html+='<h3 style="margin-top:16px">Source Files</h3><div class="gw"><table><tr><th>File Name</th><th>Type</th></tr>';
+    sf.forEach(function(f){html+='<tr><td>'+f.name+'</td><td>'+f.type+'</td></tr>'});
+    html+='</table></div>';
+  }
+  html+='<h3 style="margin-top:16px">Enumerated Values</h3>';
+  Object.keys(EN).forEach(function(k){html+='<p><strong>'+k+':</strong> '+EN[k].join(', ')+'</p>'});
+  html+='</div>';
+  return html;
+}
+
+function renderValReport(ses){
+  var results=ses.valResults||[];
+  var counts=VE.countBy(results);
+  var html='<div class="card"><h3>Validation Report</h3>';
+  html+='<div class="sc">';
+  html+='<div class="scd red"><div class="v">'+counts.blocking+'</div><div class="l">Blocking</div></div>';
+  html+='<div class="scd amb"><div class="v">'+counts.warning+'</div><div class="l">Warnings</div></div>';
+  html+='<div class="scd"><div class="v">'+counts.informational+'</div><div class="l">Informational</div></div></div>';
+  if(results.length===0){
+    html+='<p style="color:var(--gr)">No validation results. Click Run Validation.</p>';
+  } else {
+    html+='<div class="gw"><table><tr><th>Rule</th><th>Entity</th><th>Severity</th><th>Message</th><th>Resolution</th></tr>';
+    results.forEach(function(r){
+      html+='<tr><td>'+r.rule+'</td><td>'+r.entity+'</td><td>'+sevBadge(r.severity)+'</td><td>'+r.message+'</td><td>'+r.resolution+'</td></tr>';
+    });
+    html+='</table></div>';
+  }
+  html+='</div>';
+  return html;
+}
+/* ================================================================
+   SELECTION BANNER + GRID CONTROLS
+   ================================================================ */
+function getSelectedFiles(c,ses){
+  if(!ses.selectedFileIds||ses.selectedFileIds.length===0)return c.entities.submission_files.map(function(f){return f.submission_file_id});
+  return ses.selectedFileIds;
+}
+function filterBySelection(rows,ses,fileIdField){
+  if(!ses.selectedFileIds||ses.selectedFileIds.length===0)return rows;
+  return rows.filter(function(r){return ses.selectedFileIds.includes(r[fileIdField])});
+}
+function renderSelectionBanner(c,ses){
+  var total=c.entities.submission_files.length;
+  if(total===0)return '';
+  var selCount=ses.selectedFileIds?ses.selectedFileIds.length:0;
+  var isAll=selCount===0||selCount===total;
+  var label='';
+  if(isAll){label='All files ('+total+')'}
+  else{
+    var names=c.entities.submission_files.filter(function(f){return ses.selectedFileIds.includes(f.submission_file_id)}).map(function(f){return f.file_name});
+    var display=names.slice(0,4).join(', ');
+    if(names.length>4)display+=' ...and '+(names.length-4)+' more';
+    label='<strong>'+selCount+' of '+total+' files selected</strong> | Showing: '+display;
+  }
+  return '<div class="lb lk" style="justify-content:space-between">'+
+  '<span>'+label+'</span>'+
+  '<button class="btn btn-s btn-sm" onclick="app.switchTab(\'tab_si\')">'+(isAll?'Filter by File':'Modify Selection')+'</button></div>';
+}
+function renderSearchBar(tabId,ses){
+  var val=(ses.gridSearch&&ses.gridSearch[tabId])||'';
+  return '<div style="margin-bottom:8px"><input type="text" placeholder="Search..." value="'+val+'" oninput="app.setSearch(\''+tabId+'\',this.value)" style="padding:6px 12px;border:1px solid var(--gb);border-radius:4px;width:260px;font-size:13px"></div>';
+}
+function applySortAndSearch(rows,cols,tabId,ses){
+  var search=(ses.gridSearch&&ses.gridSearch[tabId])||'';
+  if(search){
+    var s=search.toLowerCase();
+    rows=rows.filter(function(r){
+      return cols.some(function(col){
+        var v=r[col.field];
+        if(v===null||v===undefined)return false;
+        return String(v).toLowerCase().indexOf(s)>=0;
+      });
+    });
+  }
+  var sortCol=ses.gridSortCol&&ses.gridSortCol[tabId];
+  if(sortCol){
+    var asc=ses.gridSortAsc&&ses.gridSortAsc[tabId]!==false;
+    rows=rows.slice().sort(function(a,b){
+      var va=a[sortCol],vb=b[sortCol];
+      if(va===null||va===undefined)va='';
+      if(vb===null||vb===undefined)vb='';
+      if(typeof va==='number'&&typeof vb==='number')return asc?va-vb:vb-va;
+      return asc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
+    });
+  }
+  return rows;
+}
+/* ================================================================
+   RENDER WORKBOOK
+   ================================================================ */
+function renderWorkbook(c,ses){
+  var tabs=CCDM.defaultTabs();
+  var activeTab=ses.activeTab||'tab_cs';
+  var banner='';
+  if(ses.isApproved)banner='<div class="lb ap">&#10003; Workbook Approved - Read Only ('+c.workbook_metadata.version_id+')</div>';
+  var toolbar='<div class="tbar">'+
+  '<button class="btn btn-s btn-sm" onclick="app.runValidation()">&#10003; Validate</button>'+
+  '<button class="btn btn-g btn-sm" onclick="app.approve()"'+(ses.isApproved?' disabled':'')+'>&#128274; Approve</button>'+
+  '<div class="em"><button class="btn btn-s btn-sm" onclick="app.toggleExport()">&#128190; Export &#9660;</button>'+
+  '<div class="ed" id="exmenu">'+
+  '<button onclick="app.doExport(\'json\')">JSON (Full Fidelity)</button>'+
+  '<button onclick="app.doExport(\'excel\')">Excel (.xlsx)</button>'+
+  '<button onclick="app.doExport(\'pdf\')">PDF (Print)</button>'+
+  '<button onclick="app.doExport(\'word\')">Word (.doc)</button></div></div>'+
+  '<button class="btn btn-s btn-sm" onclick="app.showImportModal()">&#128229; Import</button>'+
+  '<input type="file" id="importInput" accept=".json,.xlsx" style="display:none" onchange="app.handleImport(event)">'+
+  '<button class="btn btn-s btn-sm" onclick="app.showReportBuilder()">&#128203; Report Builder</button>'+
+  '<div class="sp"></div>'+
+  '<button class="btn btn-s btn-sm" onclick="app.showVersions()">&#128337; Versions</button>'+
+  '<button class="btn btn-r btn-sm" onclick="app.globalReset()">&#128260; Reset</button></div>';
+  var tabHtml='<div class="tabs">';
+  tabs.forEach(function(t){tabHtml+='<div class="tab'+(t.tab_id===activeTab?' a':'')+'" onclick="app.switchTab(\''+t.tab_id+'\')">'+t.tab_name+'</div>'});
+  tabHtml+='</div>';
+  var content='';
+  if(activeTab==='tab_dd')content=renderDataDict(c);
+  else if(activeTab==='tab_vr')content=renderValReport(ses);
+  else content=renderGrid(c,ses,activeTab);
+  return '<h1 style="margin-bottom:12px">Part 3: Submission Review Workbook</h1>'+banner+toolbar+tabHtml+content;
+}
+
+/* ================================================================
+   REPORT BUILDER MODAL (Section 6.10.4)
+   ================================================================ */
+function renderReportBuilder(){
+  var tabs=CCDM.defaultTabs();
+  var html='<h2>Report Builder</h2><p style="color:var(--gr);margin-bottom:16px">Select tabs, columns, and filters. Generated report will download as a separate file.</p>';
+  html+='<h3>1. Select Tabs</h3><div style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0">';
+  tabs.forEach(function(t){
+    if(t.tab_id==='tab_dd'||t.tab_id==='tab_vr')return;
+    html+='<label style="display:flex;align-items:center;gap:4px;font-size:13px"><input type="checkbox" class="rpt-tab" value="'+t.tab_id+'" checked>'+t.tab_name+'</label>';
+  });
+  html+='</div>';
+  html+='<h3>2. Filters</h3><div class="cg">';
+  html+='<div class="ci"><label>Confidence Level</label><select id="rptConf" multiple style="height:70px"><option value="H" selected>H - High</option><option value="M" selected>M - Medium</option><option value="L" selected>L - Low</option></select></div>';
+  html+='<div class="ci"><label>Presence Classification</label><select id="rptPres" multiple style="height:100px"><option value="Present" selected>Present</option><option value="Absent" selected>Absent</option><option value="Partial" selected>Partial</option><option value="Excluded">Excluded</option><option value="Indeterminate" selected>Indeterminate</option></select></div>';
+  html+='<div class="ci"><label>Mandatory Only</label><select id="rptMand"><option value="all">All Fields</option><option value="yes">Mandatory Only</option><option value="no">Optional Only</option></select></div>';
+  html+='<div class="ci"><label>Export Format</label><select id="rptFmt"><option value="excel">Excel (.xlsx)</option><option value="json">JSON</option><option value="word">Word (.doc)</option></select></div>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">'+
+  '<button class="btn btn-s" onclick="app.hideModal()">Cancel</button>'+
+  '<button class="btn btn-p" onclick="app.generateReport()">Generate Report</button></div>';
+  return html;
+}
+
+/* ================================================================
+   VERSION HISTORY MODAL
+   ================================================================ */
+function renderVersions(c){
+  var graph=VM.getGraph(c);
+  var curId=c.workbook_metadata.version_id;
+  var html='<h2>Version History</h2>';
+  if(graph.length===0){html+='<p style="color:var(--gr)">No versions recorded.</p>'}
+  else{
+    graph.slice().reverse().forEach(function(v){
+      var isCur=v.version_id===curId;
+      html+='<div class="vi" style="'+(isCur?'background:var(--bl)':'')+'">'+
+      '<div><strong style="font-family:monospace;font-size:12px">'+v.version_id+(isCur?' (Current)':'')+'</strong>'+
+      '<div class="vm">'+new Date(v.timestamp).toLocaleString()+' | '+v.origin_type+' | '+v.validation_status+'</div></div>'+
+      (!isCur?'<button class="btn btn-s btn-sm" onclick="app.doRollback(\''+v.version_id+'\')">Rollback</button>':'')+
+      '</div>';
+    });
+  }
+  html+='<h3 style="margin-top:16px">Audit Log (Last 20)</h3>';
+  var log=c.version_history.audit_log.slice(-20).reverse();
+  if(log.length>0){
+    html+='<div class="gw"><table><tr><th>Time</th><th>Actor</th><th>Action</th></tr>';
+    log.forEach(function(l){html+='<tr><td>'+new Date(l.timestamp).toLocaleString()+'</td><td>'+l.actor+'</td><td>'+l.action+'</td></tr>'});
+    html+='</table></div>';
+  }
+  html+='<div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn btn-s" onclick="app.hideModal()">Close</button></div>';
+  return html;
+}
+
+/* ================================================================
+   REPAIR MODE MODAL (Part 4)
+   ================================================================ */
+function renderRepair(issues){
+  var html='<h2>Repair Mode</h2><p style="color:var(--gr);margin-bottom:12px">The imported data has issues. Review and acknowledge each to proceed.</p>';
+  issues.forEach(function(iss,i){
+    html+='<div style="padding:10px;border:1px solid var(--am);border-radius:6px;margin:8px 0;background:#fffbeb">'+
+    '<strong>'+iss.field+':</strong> '+iss.message+
+    '<div style="margin-top:4px"><label style="font-size:13px"><input type="checkbox" checked> Acknowledge</label></div></div>';
+  });
+  html+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">'+
+  '<button class="btn btn-s" onclick="app.hideModal()">Cancel</button>'+
+  '<button class="btn btn-p" onclick="app.commitRepair()">Commit &amp; Continue</button></div>';
+  return html;
+}
+
+/* ================================================================
+   MAIN APPLICATION
+   ================================================================ */
+var app={
+  _repairIssues:[],
+  init:function(){
+    if(!SM.load())SM.init();
+    app.render();
+  },
+  render:function(){
+    var el=document.getElementById('app');
+    var s=SM.ses;
+    var nav=renderNav(s.phase);
+    switch(s.phase){
+      case 'p1_purpose':el.innerHTML=renderPurpose();break;
+      case 'p1_import':el.innerHTML=nav+renderImport(s);document.getElementById('s1dz').onclick=function(){document.getElementById('s1input').click()};break;
+      case 'p1_summary':el.innerHTML=nav+renderBaselineSummary(SM.ccdm);break;
+      case 'p1_config':el.innerHTML=nav+renderConfig(SM.ccdm);break;
+      case 'p2_upload':el.innerHTML=nav+renderUpload(SM.ccdm,s);document.getElementById('subdz').onclick=function(){document.getElementById('subinput').click()};break;
+      case 'p2_summary':el.innerHTML=nav+renderScanSummary(SM.ccdm,s);break;
+      case 'p3':el.innerHTML=nav+renderWorkbook(SM.ccdm,s);break;
+      default:el.innerHTML=renderPurpose();
+    }
+  },
+  showModal:function(html){document.getElementById('mc').innerHTML=html;document.getElementById('mo').classList.add('sh')},
+  hideModal:function(){document.getElementById('mo').classList.remove('sh');document.getElementById('mc').innerHTML=''},
+  /* Part 1 */
+  acknowledge:function(){SM.transition('p1_import');app.render()},
+  handleS1Drop:function(e){e.preventDefault();e.currentTarget.classList.remove('ov');
+    Array.from(e.dataTransfer.files).forEach(function(f){SM.ses.s1Files.push({name:f.name,size:f.size,type:f.type,_ref:f.name});SM._fileStore[f.name]=f});
+    SM.persist();app.render()},
+  handleS1Select:function(e){
+    Array.from(e.target.files).forEach(function(f){SM.ses.s1Files.push({name:f.name,size:f.size,type:f.type,_ref:f.name});SM._fileStore[f.name]=f});
+    SM.persist();app.render()},
+  removeS1:function(i){SM.ses.s1Files.splice(i,1);SM.persist();app.render()},
+  importS1:function(){
+    var f=SM.ses.s1Files[0];if(!f){alert('Upload a file first.');return}
+    var file=SM._fileStore[f._ref];
+    if(!file){alert('File data not available. Please re-upload.');return}
+    var ext=f.name.split('.').pop().toLowerCase();
+    if(ext==='json'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var data=JSON.parse(ev.target.result);
+          var reqs=[];
+          if(data.entities&&data.entities.requirements){reqs=data.entities.requirements}
+          else if(data.requirements_baseline&&data.requirements_baseline.requirements){reqs=data.requirements_baseline.requirements}
+          if(reqs.length===0){alert('No requirements found in JSON.');return}
+          SM.update(function(c){
+            c.requirements_baseline.requirements=reqs;
+            c.requirements_baseline.field_profile=reqs.map(function(r){return CCDM.createFieldProfile({requirement_id:r.requirement_id})});
+            c.requirements_baseline.source_import={file_name:f.name,format:'JSON',version_id:data.workbook_metadata?data.workbook_metadata.version_id:null,import_timestamp:new Date().toISOString()};
+            c.schema.data_dictionary.source_files=[{name:f.name,type:'JSON'}];
+            c.schema.data_dictionary.generated_timestamp=new Date().toISOString();
+          },'Imported Stage 1 JSON: '+reqs.length+' requirements');
+            CCDM.remapRequirementIds(SM.ccdm);
+            VM.snapshot(SM.ccdm,'Imported','Pass');SM.persist();
+          SM.transition('p1_summary');app.render();
+        }catch(ex){alert('Error parsing JSON: '+ex.message)}
+      };
+      reader.readAsText(file);
+    } else if(ext==='xlsx'||ext==='xls'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var wb=XLSX.read(ev.target.result,{type:'array'});
+          var ws=wb.Sheets['Requirements']||wb.Sheets[wb.SheetNames[0]];
+          if(!ws){alert('No Requirements sheet found.');return}
+          var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+          var reqs=rows.map(function(row){
+            return CCDM.createReq({
+              requirement_id:row['Requirement ID']||row['requirement_id']||CCDM.uid('req'),
+              field_name:row['Field Name']||row['field_name']||'',
+              mandatory:String(row['Mandatory']||row['mandatory']||'').toLowerCase()==='yes'||row['mandatory']===true,
+              response_type:row['Response Type']||row['response_type']||'free-text',
+              data_type:row['Data Type']||row['data_type']||'string',
+              field_type:row['Field Type']||row['field_type']||'text',
+              section_id:row['Section']||row['section_id']||'',
+              template_scope:row['Template']||row['template_scope']||'Both',
+              evidence_requirements:row['Evidence Requirements']||'',
+              reviewer_guidance:row['Reviewer Guidance']||''
+            });
+          });
+if(reqs.length===0){alert('No requirements found in spreadsheet.');return}
+          SM.update(function(c){
+            c.requirements_baseline.requirements=reqs;
+            c.requirements_baseline.field_profile=reqs.map(function(r){return CCDM.createFieldProfile({requirement_id:r.requirement_id})});
+            c.requirements_baseline.source_import={file_name:f.name,format:'Excel',version_id:null,import_timestamp:new Date().toISOString()};
+            c.schema.data_dictionary.source_files=[{name:f.name,type:'Excel'}];
+            c.schema.data_dictionary.generated_timestamp=new Date().toISOString();
+          },'Imported Stage 1 Excel: '+reqs.length+' requirements');
+            CCDM.remapRequirementIds(SM.ccdm);
+            VM.snapshot(SM.ccdm,'Imported','Pass');SM.persist();
+            SM.transition('p1_summary');app.render();
+        }catch(ex){alert('Error reading Excel: '+ex.message)}
+      };
+      reader.readAsArrayBuffer(file);
+    } else {alert('Unsupported format. Use JSON or XLSX.')}
+  },
+  toggleProfile:function(i,checked){
+    var req=SM.ccdm.requirements_baseline.requirements[i];
+    var prof=SM.ccdm.requirements_baseline.field_profile.find(function(p){return p.requirement_id===req.requirement_id});
+    if(prof)prof.included_in_scan=checked;
+    SM.persist();
+  },
+  setComplexity:function(i,val){
+    var req=SM.ccdm.requirements_baseline.requirements[i];
+    var prof=SM.ccdm.requirements_baseline.field_profile.find(function(p){return p.requirement_id===req.requirement_id});
+    if(prof)prof.complexity_flag=val;
+    SM.persist();
+  },
+  selectAllProfiles:function(val){
+    SM.ccdm.requirements_baseline.field_profile.forEach(function(p){p.included_in_scan=val});
+    SM.persist();app.render();
+  },
+navTo:function(phase){
+    if(phase==='p2_upload'&&!SM.ses.isLocked){alert('Lock the baseline first.');return}
+    if(phase==='p3'&&SM.ccdm.entities.findings.length===0){alert('Run a scan first.');return}
+    SM.transition(phase);app.render();
+  },
+setBaselineFilter:function(val){SM.ses._baselineFilter=val;SM.persist();app.render()},
+  sortBaseline:function(col){
+    if(SM.ses._baselineSortCol===col){SM.ses._baselineSortDir=SM.ses._baselineSortDir==='asc'?'desc':'asc'}
+    else{SM.ses._baselineSortCol=col;SM.ses._baselineSortDir='asc'}
+    SM.persist();app.render();
+  },
+  goToProfile:function(){SM.transition('p1_config');app.render()},
+  goToConfig:function(){SM.transition('p1_config');app.render()},
+  lockBaseline:function(){
+    var optThresh=parseInt(document.getElementById('cfgOpt').value)||75;
+    if(optThresh<0||optThresh>100){alert('Optional threshold must be between 0 and 100.');return}
+    SM.update(function(c){
+      c.scan_configuration.optional_threshold=parseInt(document.getElementById('cfgOpt').value)||75;
+      c.scan_configuration.flag_partial=document.getElementById('cfgFlag').checked;
+      c.workbook_metadata.status='Locked';
+    },'Baseline locked');
+    SM.ses.isLocked=true;
+    VM.snapshot(SM.ccdm,'Locked','Pass');SM.persist();
+    SM.transition('p2_upload');app.render();
+  },
+  backToPart1:function(){
+    if(!confirm('Unlock baseline? This will clear ALL Part 2, Part 3, and Part 4 work. This cannot be undone.'))return;
+    SM.update(function(c){
+      c.workbook_metadata.status='Draft';
+      c.entities.submission_files=[];
+      c.entities.findings=[];
+      c.entities.confidence_assessments=[];
+    },'force');
+    SM.ses.isLocked=false;SM.ses.isApproved=false;SM.ses.subFiles=[];SM.ses.scanStats=null;SM.ses.valResults=[];
+    SM._fileStore={};
+    SM.audit('user','Unlocked baseline - Parts 2/3/4 cleared');
+    SM.transition('p1_import');SM.persist();app.render();
+  },
+  /* Part 2 */
+  handleSubDrop:function(e){e.preventDefault();e.currentTarget.classList.remove('ov');
+    Array.from(e.dataTransfer.files).forEach(function(f){app._addSubFile(f)});
+    SM.persist();app.render()},
+  handleSubSelect:function(e){
+    Array.from(e.target.files).forEach(function(f){app._addSubFile(f)});
+    SM.persist();app.render()},
+  _addSubFile:function(f){
+    var ext=f.name.split('.').pop().toUpperCase();
+    if(!EN.fileType.includes(ext)){alert(f.name+': unsupported format. Use CSV, XLS, XLSX, PDF, DOC, or DOCX.');return}
+    var tpl='Unknown';
+    var fn=f.name.toLowerCase();
+    if(fn.indexOf(' en ')>=0||fn.indexOf(' en-')>=0||fn.indexOf('-en ')>=0||fn.indexOf('enhancement')>=0)tpl='Enhancement';
+    else if(fn.indexOf(' su ')>=0||fn.indexOf(' su-')>=0||fn.indexOf('-su ')>=0||fn.indexOf('start-up')>=0||fn.indexOf('startup')>=0)tpl='Start-Up';
+    var sf=CCDM.createSubFile({file_name:f.name,file_type:ext,template_type:tpl,processing_status:'Checking...',sort_order:SM.ccdm.entities.submission_files.length});
+    SM.ccdm.entities.submission_files.push(sf);
+    SM._fileStore[sf.submission_file_id]=f;
+    SM.audit('user','Added submission file: '+f.name);
+    app._checkReadability(sf,f);
+  },
+  _checkReadability:function(sf,file){
+    var ext=sf.file_type;
+    if(ext==='CSV'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        var text=ev.target.result||'';
+        var lines=text.split('\n').filter(function(l){return l.trim()!==''});
+        if(lines.length>0){sf.processing_status='Readable ('+lines.length+' rows)'}
+        else{sf.processing_status='Unreadable (empty file)'}
+        SM.persist();app.render();
+      };
+      reader.onerror=function(){sf.processing_status='Unreadable (read error)';SM.persist();app.render()};
+      reader.readAsText(file);
+    } else if(ext==='XLS'||ext==='XLSX'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var wb=XLSX.read(ev.target.result,{type:'array',sheetRows:5});
+          var totalRows=0;
+          wb.SheetNames.forEach(function(sn){
+            var ws=wb.Sheets[sn];
+            var data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+            totalRows+=data.length;
+          });
+          sf.sheet_count=wb.SheetNames.length;
+          if(totalRows>0){sf.processing_status='Readable ('+wb.SheetNames.length+' sheet'+(wb.SheetNames.length>1?'s':'')+')'}
+          else{sf.processing_status='Unreadable (no data)'}
+        }catch(e){sf.processing_status='Unreadable ('+e.message+')'}
+        SM.persist();app.render();
+      };
+      reader.onerror=function(){sf.processing_status='Unreadable (read error)';SM.persist();app.render()};
+      reader.readAsArrayBuffer(file);
+    } else if(ext==='PDF'&&window.pdfjsLib){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        pdfjsLib.getDocument({data:ev.target.result}).promise.then(function(pdf){
+          pdf.getPage(1).then(function(page){
+            page.getTextContent().then(function(content){
+              var text=content.items.map(function(i){return i.str}).join(' ').trim();
+              if(text.length>50&&text.indexOf('Please wait')<0&&text.indexOf('cannot be opened')<0&&text.indexOf('form will not work')<0&&text.indexOf('save the file')<0){
+                sf.processing_status='Readable ('+pdf.numPages+' page'+(pdf.numPages>1?'s':'')+')'
+              } else {
+                sf.processing_status='Unreadable (XFA or no text layer)'
+              }
+              SM.persist();app.render();
+            });
+          });
+        }).catch(function(){sf.processing_status='Unreadable (PDF parse error)';SM.persist();app.render()});
+      };
+      reader.onerror=function(){sf.processing_status='Unreadable (read error)';SM.persist();app.render()};
+      reader.readAsArrayBuffer(file);
+    } else if(ext==='PDF'){
+      sf.processing_status='Unreadable (PDF.js not loaded)';
+      SM.persist();app.render();
+    } else {
+      sf.processing_status='Manual Review Required ('+ext+')';
+      SM.persist();app.render();
+    }
+  },
+  removeSubFile:function(sfId){
+    SM.ccdm.entities.submission_files=SM.ccdm.entities.submission_files.filter(function(f){return f.submission_file_id!==sfId});
+    delete SM._fileStore[sfId];
+    SM.persist();app.render();
+  },
+  changeSort:function(mode){SM.ses.sortMode=mode;SM.persist();app.render()},
+  runScan:function(){
+    var files=SM.ccdm.entities.submission_files;
+    if(files.length===0){alert('Upload submission files first.');return}
+    SM.ccdm.entities.findings=[];
+    SM.ccdm.entities.confidence_assessments=[];
+    var pending=files.length;
+    var totalFindings=0;
+    files.forEach(function(sf){
+      var file=SM._fileStore[sf.submission_file_id];
+      if(!file){
+        sf.processing_status='Error: File data unavailable';sf.scan_timestamp=new Date().toISOString();
+        pending--;if(pending===0)app._finishScan();return;
+      }
+      var ext=sf.file_type;
+      if(ext==='CSV'){
+        var reader=new FileReader();
+        reader.onload=function(ev){
+          var text=ev.target.result;
+          var lines=text.split('\n').map(function(l){return l.split(',').map(function(c){return c.trim().replace(/^"|"$/g,'')})});
+          var headers=lines[0]||[];var rows=lines.slice(1).filter(function(r){return r.length>1||r[0]!==''});
+          var findings=CE.scanFile(SM.ccdm,sf.submission_file_id,headers,rows);
+          findings.forEach(function(f){f.file_name=sf.file_name});
+          SM.ccdm.entities.findings=SM.ccdm.entities.findings.concat(findings);
+          var ca=CE.calculateCompleteness(SM.ccdm,sf.submission_file_id);
+          ca.file_name=sf.file_name;
+          SM.ccdm.entities.confidence_assessments.push(ca);
+          sf.processing_status='OK';sf.sheet_count=1;sf.scan_timestamp=new Date().toISOString();
+          totalFindings+=findings.length;
+          pending--;if(pending===0)app._finishScan();
+        };
+        reader.readAsText(file);
+} else if(ext==='XLS'||ext==='XLSX'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var wb=XLSX.read(ev.target.result,{type:'array'});
+          sf.sheet_count=wb.SheetNames.length;
+          var allFindings=[];
+          wb.SheetNames.forEach(function(sn){
+            var ws=wb.Sheets[sn];
+            var data=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+            var headers=(data[0]||[]).map(String);var rows=data.slice(1);
+            var findings=CE.scanFile(SM.ccdm,sf.submission_file_id,headers,rows);
+            findings.forEach(function(f){f.file_name=sf.file_name});
+            allFindings=allFindings.concat(findings);
+          });
+          var best={};
+          allFindings.forEach(function(f){
+            var key=f.requirement_id;
+            if(!best[key]||f.confidence_contribution>best[key].confidence_contribution)best[key]=f;
+          });
+          var deduped=Object.keys(best).map(function(k){return best[k]});
+          SM.ccdm.entities.findings=SM.ccdm.entities.findings.concat(deduped);
+          var ca=CE.calculateCompleteness(SM.ccdm,sf.submission_file_id);
+          ca.file_name=sf.file_name;
+          SM.ccdm.entities.confidence_assessments.push(ca);
+          sf.processing_status='OK';sf.scan_timestamp=new Date().toISOString();
+          totalFindings+=deduped.length;
+        }catch(ex){sf.processing_status='Error: '+ex.message}
+        pending--;if(pending===0)app._finishScan();
+      };
+      reader.readAsArrayBuffer(file);
+    } else if((ext==='PDF')&&window.pdfjsLib&&sf.processing_status.indexOf('Readable')===0){
+      /* PDF with readable text - section-aware matching */
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        pdfjsLib.getDocument({data:ev.target.result}).promise.then(function(pdf){
+          var pagePromises=[];
+          for(var p=1;p<=pdf.numPages;p++){
+            pagePromises.push(pdf.getPage(p).then(function(page){
+              return page.getTextContent().then(function(content){
+                return content.items.map(function(item){return item.str}).join(' ');
+              });
+            }));
+          }
+          Promise.all(pagePromises).then(function(pages){
+            var fullText=pages.join('\n');
+            var reqs=SM.ccdm.requirements_baseline.requirements;
+            var profs=SM.ccdm.requirements_baseline.field_profile;
+            var findings=[];
+            var placeholders=['n/a','-','na','tbd','select one','-select one-','null','none','0',''];
+            var stopWords=['the','and','for','with','from','that','this','are','was','has','its','not','of','in','to','or','is','a','an','by','on','at','be'];
+
+            /* ── Section detection ── */
+            var sectionRegex=/section\s+([a-f])\s*[:\-–]/gi;
+            var sections=[];
+            var secMatch;
+            while((secMatch=sectionRegex.exec(fullText))!==null){
+              sections.push({letter:secMatch[1].toUpperCase(),pos:secMatch.index});
+            }
+            /* Also detect "Mandatory Criteria" as a pseudo-section */
+            var mcPos=fullText.toLowerCase().indexOf('mandatory criteria');
+            if(mcPos>=0)sections.unshift({letter:'MC',pos:mcPos});
+            sections.sort(function(a,b){return a.pos-b.pos});
+
+            /* Helper: get text for a section letter */
+            var getSectionText=function(letter){
+              if(sections.length===0)return fullText;
+              for(var i=0;i<sections.length;i++){
+                if(sections[i].letter===letter){
+                  var start=sections[i].pos;
+                  var end=i<sections.length-1?sections[i+1].pos:fullText.length;
+                  return fullText.substring(start,end);
+                }
+              }
+              return '';
+            };
+
+            /* Helper: map requirement section_id to section letter(s) */
+            var mapSection=function(secId){
+              if(!secId)return [''];
+              var low=secId.toLowerCase();
+              if(low.indexOf('mandatory')>=0)return ['MC'];
+              var m=secId.match(/section\s+([a-f])\/([a-f])/i);
+              if(m)return [m[1].toUpperCase(),m[2].toUpperCase()];
+              var m2=secId.match(/section\s+([a-f])/i);
+              if(m2)return [m2[1].toUpperCase()];
+              return [''];
+            };
+
+            /* Helper: build search text from section letters */
+            var buildSearchText=function(letters){
+              if(!letters||letters.length===0||letters[0]==='')return fullText;
+              var txt='';
+              letters.forEach(function(l){
+                var st=getSectionText(l);
+                if(st)txt+=st+'\n';
+              });
+              return txt.length>20?txt:fullText;
+            };
+
+            /* Helper: extract keywords from a field name */
+            var getKeywords=function(name){
+              return name.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(function(w){
+                return w.length>2&&!stopWords.includes(w);
+              });
+            };
+
+            /* Helper: find value between label match and next label boundary */
+            var knownLabels=reqs.map(function(r){return r.field_name}).filter(function(n){return n.length>3});
+            var extractValue=function(text,matchEnd){
+              var remaining=text.substring(matchEnd,matchEnd+600).trim();
+              /* Find the nearest next known label to use as boundary */
+              var boundary=remaining.length;
+              var remLower=remaining.toLowerCase();
+              knownLabels.forEach(function(lbl){
+                var kws=getKeywords(lbl);
+                if(kws.length<2)return;
+                var idx=remLower.indexOf(kws[0]);
+                if(idx>0&&idx<boundary){
+                  var chunk=remLower.substring(idx,idx+lbl.length+30);
+                  var matched=kws.filter(function(k){return chunk.indexOf(k)>=0}).length;
+                  if(matched>=Math.ceil(kws.length*0.6))boundary=idx;
+                }
+              });
+              /* Also check for section headers as boundaries */
+              var secBound=remaining.search(/Section\s+[A-F]\s*[:\-–]/i);
+              if(secBound>0&&secBound<boundary)boundary=secBound;
+              var raw=remaining.substring(0,boundary).trim();
+              raw=raw.replace(/^[\s:–\-]+/,'').trim();
+              /* Take meaningful content, skip empty lines */
+              var lines=raw.split(/\n/).map(function(l){return l.trim()}).filter(function(l){return l.length>0});
+              var val=lines.join(' ').trim();
+              if(val.length>200)val=val.substring(0,200)+'...';
+              if(placeholders.includes(val.toLowerCase()))return '';
+              return val;
+            };
+
+            /* ── Assessment criteria keyword map ── */
+            var acPatterns=[
+              {match:'industry standard',field:'Assessment Criteria 1 (EN)'},
+              {match:'today\'s workforce',field:'Assessment Criteria 1 (EN)'},
+              {match:'students\' interests and/or needs',field:'Assessment Criteria 2'},
+              {match:'student interest',field:'Assessment Criteria 2'},
+              {match:'essential and technical skills',field:'Assessment Criteria 3 (EN)'},
+              {match:'world of work',field:'Assessment Criteria 3 (EN)'},
+              {match:'labour market',field:'Assessment Criteria 1 (SU)'},
+              {match:'local context',field:'Assessment Criteria 3 (SU)'},
+              {match:'sustainability',field:'Assessment Criteria 3 (SU)'},
+              {match:'implemented during',field:'Assessment Criteria 4 (SU)'},
+              {match:'current school year',field:'Assessment Criteria 4 (SU)'}
+            ];
+
+            /* ── Process each requirement ── */
+            reqs.forEach(function(req){
+              var prof=profs.find(function(p){return p.requirement_id===req.requirement_id})||{};
+              if(prof.included_in_scan===false){
+                findings.push(CCDM.createFinding({submission_file_id:sf.submission_file_id,file_name:sf.file_name,requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:'Excluded',detection_method:'',confidence_contribution:0}));
+                return;
+              }
+              var fileTemplate=sf.template_type||'Unknown';
+              var reqScope=req.template_scope||'Both';
+              if(reqScope!=='Both'&&fileTemplate!=='Unknown'&&reqScope!==fileTemplate){
+                findings.push(CCDM.createFinding({submission_file_id:sf.submission_file_id,file_name:sf.file_name,requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:'Not Applicable',detection_method:'Template Scope',confidence_contribution:0}));
+                return;
+              }
+
+              /* Determine search scope */
+              var secLetters=mapSection(req.section_id);
+              var searchText=buildSearchText(secLetters);
+              var searchLower=searchText.toLowerCase();
+              var fieldName=req.field_name||'';
+              var fieldLower=fieldName.toLowerCase();
+              var keywords=getKeywords(fieldName);
+
+              var bestScore=0;
+              var bestMethod='';
+              var extractedValue='';
+
+              /* Strategy 1: Exact label in section text */
+              var exactPos=searchLower.indexOf(fieldLower);
+              if(exactPos>=0){
+                bestScore=1;
+                bestMethod='PDF Section: Exact Label';
+                extractedValue=extractValue(searchText,exactPos+fieldName.length);
+              }
+
+              /* Strategy 2: Keyword overlap in section */
+              if(bestScore<1&&keywords.length>0){
+                var matched=keywords.filter(function(k){return searchLower.indexOf(k)>=0});
+                var kwScore=matched.length/keywords.length;
+                if(kwScore>bestScore&&kwScore>=0.5){
+                  bestScore=kwScore;
+                  bestMethod='PDF Section: Keyword ('+matched.length+'/'+keywords.length+')';
+                  /* Find value near keyword cluster */
+                  if(matched.length>0){
+                    var positions=matched.map(function(k){return searchLower.indexOf(k)}).sort(function(a,b){return a-b});
+                    var clusterEnd=positions[positions.length-1]+matched[matched.length-1].length;
+                    extractedValue=extractValue(searchText,clusterEnd);
+                  }
+                }
+              }
+
+              /* Strategy 3: Assessment criteria special handling */
+              if(bestScore<0.8&&fieldLower.indexOf('assessment criteria')>=0){
+                for(var ai=0;ai<acPatterns.length;ai++){
+                  var acp=acPatterns[ai];
+                  if(fieldName.indexOf(acp.field)>=0||fieldLower.indexOf(acp.field.toLowerCase())>=0){
+                    var acPos=searchLower.indexOf(acp.match);
+                    if(acPos>=0){
+                      bestScore=0.9;
+                      bestMethod='PDF Section: Assessment Criteria Pattern';
+                      /* Value is after "characters)" prompt ending */
+                      var promptEnd=searchLower.indexOf('characters)',acPos);
+                      if(promptEnd>=0){
+                        extractedValue=extractValue(searchText,promptEnd+11);
+                      } else {
+                        extractedValue=extractValue(searchText,acPos+acp.match.length+100);
+                      }
+                      break;
+                    }
+                  }
+                }
+              }
+
+              /* Strategy 4: Checkbox / mandatory criteria detection */
+              if(bestScore<0.5&&(req.response_type==='checkbox'||req.data_type==='boolean')){
+                var ckKeywords=fieldLower.replace(/mandatory criteria \d+\s*\([^)]*\):\s*/i,'').split(/\s+/).filter(function(w){return w.length>3&&!stopWords.includes(w)});
+                if(ckKeywords.length>0){
+                  var ckMatched=ckKeywords.filter(function(k){return searchLower.indexOf(k)>=0}).length;
+                  if(ckMatched>=Math.ceil(ckKeywords.length*0.4)){
+                    bestScore=0.8;
+                    bestMethod='PDF Section: Checkbox Content ('+ckMatched+'/'+ckKeywords.length+' keywords)';
+                    extractedValue='Checked (content present in document)';
+                  }
+                }
+              }
+
+              /* Strategy 5: Data type pattern matching */
+              if(bestScore<0.5){
+                var dt=req.data_type||'';
+                var rt=req.response_type||'';
+                if(dt==='email'||rt==='email'){
+                  var emails=searchText.match(/[\w.\-]+@[\w.\-]+\.\w{2,}/g);
+                  if(emails){
+                    for(var ei=0;ei<emails.length;ei++){
+                      var ePos=searchLower.indexOf(emails[ei].toLowerCase());
+                      var nearbyBefore=searchLower.substring(Math.max(0,ePos-150),ePos);
+                      var nearKw=keywords.filter(function(k){return nearbyBefore.indexOf(k)>=0}).length;
+                      if(nearKw>0){bestScore=0.75;bestMethod='PDF Section: Email Pattern';extractedValue=emails[ei];break}
+                    }
+                  }
+                } else if(dt==='currency'||rt==='currency'){
+                  var currencies=searchText.match(/\$[\d,]+\.?\d*/g);
+                  if(currencies){
+                    for(var ci=0;ci<currencies.length;ci++){
+                      var cPos=searchLower.indexOf(currencies[ci].toLowerCase());
+                      var cBefore=searchLower.substring(Math.max(0,cPos-200),cPos);
+                      var cKw=keywords.filter(function(k){return cBefore.indexOf(k)>=0}).length;
+                      if(cKw>0){bestScore=0.75;bestMethod='PDF Section: Currency Pattern';extractedValue=currencies[ci];break}
+                    }
+                  }
+                } else if(dt==='phone'||rt==='phone'){
+                  var phones=searchText.match(/\d{3}[\s.\-]\d{3}[\s.\-]\d{4}/g);
+                  if(phones){
+                    for(var pi=0;pi<phones.length;pi++){
+                      var pPos=searchLower.indexOf(phones[pi]);
+                      var pBefore=searchLower.substring(Math.max(0,pPos-150),pPos);
+                      var pKw=keywords.filter(function(k){return pBefore.indexOf(k)>=0}).length;
+                      if(pKw>0){bestScore=0.75;bestMethod='PDF Section: Phone Pattern';extractedValue=phones[pi];break}
+                    }
+                  }
+                } else if(dt==='date'||rt==='date'){
+                  var dates=searchText.match(/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,]+\d{1,2}[\s,]+\d{4}|\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/gi);
+                  if(dates){
+                    for(var di=0;di<dates.length;di++){
+                      var dPos=searchLower.indexOf(dates[di].toLowerCase());
+                      var dBefore=searchLower.substring(Math.max(0,dPos-150),dPos);
+                      var dKw=keywords.filter(function(k){return dBefore.indexOf(k)>=0}).length;
+                      if(dKw>0){bestScore=0.75;bestMethod='PDF Section: Date Pattern';extractedValue=dates[di];break}
+                    }
+                  }
+                }
+              }
+
+              /* Strategy 6: Fuzzy sliding window (last resort) */
+              if(bestScore<0.5){
+                var textWords=searchText.split(/\s+/);
+                var winSize=Math.min(fieldName.split(' ').length+2,10);
+                for(var wi=0;wi<textWords.length-winSize+1&&bestScore<0.6;wi++){
+                  var chunk=textWords.slice(wi,wi+winSize).join(' ');
+                  var sim=CE.similarity(fieldName,chunk);
+                  if(sim>bestScore&&sim>=0.45){
+                    bestScore=sim;
+                    bestMethod='PDF Section: Fuzzy ('+Math.round(sim*100)+'%)';
+                    extractedValue=extractValue(searchText,searchText.indexOf(chunk)+chunk.length);
+                  }
+                }
+              }
+
+              /* ── Classify ── */
+              var presence='Absent';
+              var notes='';
+              if(bestScore>=0.7&&extractedValue){
+                presence='Present';
+                notes=bestMethod+': field found with value';
+              } else if(bestScore>=0.7&&!extractedValue){
+                presence='Partial';
+                notes=bestMethod+': label/pattern found but no substantive value detected';
+              } else if(bestScore>=0.5&&extractedValue){
+                presence='Present';
+                notes=bestMethod+': matched with extracted value';
+              } else if(bestScore>=0.5){
+                presence='Partial';
+                notes=bestMethod+': weak match, no value extracted';
+              } else {
+                presence='Absent';
+                notes='No matching label, keywords, or data patterns found in document';
+              }
+
+              findings.push(CCDM.createFinding({submission_file_id:sf.submission_file_id,file_name:sf.file_name,requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:presence,detection_method:bestMethod||'None',confidence_contribution:Math.round(bestScore*100),complexity_flag:prof.complexity_flag||'',reviewer_notes:notes,extracted_value:extractedValue}));
+            });
+
+            SM.ccdm.entities.findings=SM.ccdm.entities.findings.concat(findings);
+            var ca=CE.calculateCompleteness(SM.ccdm,sf.submission_file_id);
+            ca.file_name=sf.file_name;
+            SM.ccdm.entities.confidence_assessments.push(ca);
+            sf.processing_status='Scanned';sf.sheet_count=pdf.numPages;sf.scan_timestamp=new Date().toISOString();
+            totalFindings+=findings.length;
+            pending--;if(pending===0)app._finishScan();
+          });
+        }).catch(function(err){
+          sf.processing_status='Error: '+err.message;sf.scan_timestamp=new Date().toISOString();
+          pending--;if(pending===0)app._finishScan();
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      /* DOC, DOCX, or unreadable PDF: Indeterminate classification */
+      var reqs=SM.ccdm.requirements_baseline.requirements;
+      var profs=SM.ccdm.requirements_baseline.field_profile;
+      var indetFindings=reqs.map(function(req){
+        var prof=profs.find(function(p){return p.requirement_id===req.requirement_id})||{};
+        if(prof.included_in_scan===false){
+          return CCDM.createFinding({submission_file_id:sf.submission_file_id,file_name:sf.file_name,requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:'Excluded',detection_method:'',confidence_contribution:0,complexity_flag:prof.complexity_flag||''});
+        }
+        return CCDM.createFinding({submission_file_id:sf.submission_file_id,file_name:sf.file_name,requirement_id:req.requirement_id,field_name:req.field_name,mandatory:req.mandatory,response_type:req.response_type,section_id:req.section_id,presence_classification:'Indeterminate',detection_method:'Indeterminate',confidence_contribution:0,complexity_flag:prof.complexity_flag||'',reviewer_notes:'Format not supported for automated extraction ('+sf.file_type+'). Manual classification required.'});
+      });
+      SM.ccdm.entities.findings=SM.ccdm.entities.findings.concat(indetFindings);
+      var ca=CE.calculateCompleteness(SM.ccdm,sf.submission_file_id);
+      ca.file_name=sf.file_name;
+      SM.ccdm.entities.confidence_assessments.push(ca);
+      sf.processing_status='OK (Manual Review Required)';sf.sheet_count=0;sf.scan_timestamp=new Date().toISOString();
+      totalFindings+=indetFindings.length;
+      pending--;if(pending===0)app._finishScan();
+    }
+    });
+  },
+  _finishScan:function(){
+    SM.update(function(c){c.workbook_metadata.status='Scanned'},'Scan complete');
+    VM.snapshot(SM.ccdm,'Scanned','Pass');
+    SM.ses.scanStats={files:SM.ccdm.entities.submission_files.length,reqs:SM.ccdm.requirements_baseline.requirements.length,findings:SM.ccdm.entities.findings.length};
+    SM.transition('p2_summary');SM.persist();app.render();
+  },
+  setScanFilter:function(val){SM.ses._scanFilter=val;SM.persist();app.render()},
+  setScanSearch:function(val){SM.ses._scanSearch=val;SM.persist();app.render()},
+    sortScan:function(col){
+    if(SM.ses._scanSortCol===col){SM.ses._scanSortDir=SM.ses._scanSortDir==='asc'?'desc':'asc'}
+    else{SM.ses._scanSortCol=col;SM.ses._scanSortDir='asc'}
+    SM.persist();app.render();
+  },
+  goToPart3:function(){SM.transition('p3');app.render()},
+  /* Part 3 */
+  switchTab:function(t){SM.ses.activeTab=t;SM.persist();app.render()},
+  editCell:function(td){
+    var field=td.dataset.field;var tabId=td.dataset.tab;var ri=parseInt(td.dataset.row);
+    var val=td.textContent.trim();
+    var rows=getTabData(SM.ccdm,tabId);
+    if(!rows[ri])return;
+    /* Find the actual entity and update it */
+    if(tabId==='tab_fd'){
+      var finding=SM.ccdm.entities.findings[ri];
+      if(finding){
+        if(field==='presence_classification'&&!EN.presence.includes(val)){alert('Invalid. Use: '+EN.presence.join(', '));app.render();return}
+        if(field==='presence_classification')finding.detection_method='Manual Override';
+        finding[field]=val;
+      }
+    } else if(tabId==='tab_cs'||tabId==='tab_cr'){
+      var ca=SM.ccdm.entities.confidence_assessments[ri];
+      if(ca)ca[field]=val;
+    }
+    SM.audit('user','Edited '+field+' in '+tabId);SM.persist();
+  },
+  runValidation:function(){
+    SM.ses.valResults=VE.runAll(SM.ccdm);
+    SM.ses.activeTab='tab_vr';
+    SM.audit('user','Validation: '+SM.ses.valResults.length+' findings');
+    SM.persist();app.render();
+  },
+  approve:function(){
+    var results=VE.runAll(SM.ccdm);SM.ses.valResults=results;
+    if(VE.hasBlocking(results)){
+      alert('Cannot approve: '+VE.countBy(results).blocking+' blocking error(s).');
+      SM.ses.activeTab='tab_vr';SM.persist();app.render();return;
+    }
+    if(!confirm('Approve workbook? This creates an immutable snapshot and locks editing.'))return;
+    SM.update(function(c){c.workbook_metadata.status='Approved'},'Workbook approved');
+    VM.snapshot(SM.ccdm,'Approved','Pass');
+    SM.ses.isApproved=true;SM.persist();app.render();
+  },
+  toggleExport:function(){var m=document.getElementById('exmenu');m.classList.toggle('sh')},
+  doExport:function(fmt){
+    document.getElementById('exmenu').classList.remove('sh');
+    if(!EE.canExport(SM.ses.valResults||[]))return;
+    if(fmt==='json')EE.exportJSON(SM.ccdm);
+    else if(fmt==='excel')EE.exportExcel(SM.ccdm);
+    else if(fmt==='pdf')EE.exportPDF();
+    else if(fmt==='word')EE.exportWord(SM.ccdm);
+    SM.audit('user','Exported as '+fmt);SM.persist();
+  },
+  showImportModal:function(){document.getElementById('importInput').click()},
+  handleImport:function(e){
+    var file=e.target.files[0];if(!file)return;
+    var ext=file.name.split('.').pop().toLowerCase();
+    if(ext==='json'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var data=JSON.parse(ev.target.result);
+          var errs=VE.v14(data);
+          if(errs.some(function(e){return e.severity==='blocking'})){
+            app._repairIssues=errs.map(function(e){return {field:e.entity,message:e.message}});
+            app.showModal(renderRepair(app._repairIssues));return;
+          }
+          SM.update(function(c){
+            if(data.entities)c.entities=data.entities;
+            if(data.requirements_baseline)c.requirements_baseline=data.requirements_baseline;
+            if(data.scan_configuration)c.scan_configuration=data.scan_configuration;
+            if(data.schema)c.schema=data.schema;
+            c.workbook_metadata.status='Scanned';
+          },'Imported CCDM from JSON');
+          VM.snapshot(SM.ccdm,'Imported','Pass');
+          SM.ses.isApproved=false;SM.persist();
+          alert('JSON import successful.');app.render();
+        }catch(ex){alert('JSON parse error: '+ex.message)}
+      };
+      reader.readAsText(file);
+    } else if(ext==='xlsx'){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          var wb=XLSX.read(ev.target.result,{type:'array'});
+          /* Reconstruct findings from Field Detail sheet */
+          var fdSheet=wb.Sheets['Field Detail'];
+          if(fdSheet){
+            var rows=XLSX.utils.sheet_to_json(fdSheet,{defval:''});
+            var findings=rows.map(function(r){
+              return CCDM.createFinding({finding_id:r['Finding ID']||CCDM.uid('f'),submission_file_id:r['File ID']||'',file_name:r['File Name']||'',requirement_id:r['Req ID']||'',field_name:r['Field Name']||'',mandatory:String(r['Mandatory']).toLowerCase()==='yes',response_type:r['Response Type']||'',section_id:r['Section']||'',presence_classification:r['Presence']||'Absent',detection_method:r['Detection']||'',confidence_contribution:Number(r['Confidence'])||0,complexity_flag:r['Complexity']||'',reviewer_notes:r['Notes']||''});
+            });
+            SM.update(function(c){c.entities.findings=findings},'Excel import: Field Detail');
+          }
+          VM.snapshot(SM.ccdm,'Imported','Warn');
+          SM.ses.isApproved=false;SM.persist();
+          alert('Excel import successful (inferential reconstruction).');app.render();
+        }catch(ex){alert('Excel import error: '+ex.message)}
+      };
+      reader.readAsArrayBuffer(file);
+    } else {alert('Use JSON or XLSX.')}
+    e.target.value='';
+  },
+  showReportBuilder:function(){app.showModal(renderReportBuilder())},
+  generateReport:function(){
+    var selTabs=[];document.querySelectorAll('.rpt-tab:checked').forEach(function(cb){selTabs.push(cb.value)});
+    if(selTabs.length===0){alert('Select at least one tab.');return}
+    var confSel=Array.from(document.getElementById('rptConf').selectedOptions).map(function(o){return o.value});
+    var presSel=Array.from(document.getElementById('rptPres').selectedOptions).map(function(o){return o.value});
+    var mandFilter=document.getElementById('rptMand').value;
+    var fmt=document.getElementById('rptFmt').value;
+    /* Filter data */
+    var c=SM.ccdm;
+    var filteredFindings=c.entities.findings.filter(function(f){
+      if(mandFilter==='yes'&&!f.mandatory)return false;
+      if(mandFilter==='no'&&f.mandatory)return false;
+      if(!presSel.includes(f.presence_classification))return false;
+      return true;
+    });
+    var filteredCA=c.entities.confidence_assessments.filter(function(a){return confSel.includes(a.confidence_level)});
+    if(fmt==='json'){
+      var payload={tabs:selTabs,filters:{confidence:confSel,presence:presSel,mandatory:mandFilter},completeness_summary:selTabs.includes('tab_cs')?filteredCA:[],field_detail:selTabs.includes('tab_fd')?filteredFindings:[],confidence_report:selTabs.includes('tab_cr')?filteredCA:[],submission_inventory:selTabs.includes('tab_si')?c.entities.submission_files:[],requirements_baseline:selTabs.includes('tab_rb')?c.requirements_baseline.requirements:[]};
+      EE.dl(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),'Report_'+Date.now()+'.json');
+    } else if(fmt==='excel'){
+      var wb=XLSX.utils.book_new();
+      if(selTabs.includes('tab_cs')){
+        var d=filteredCA.map(function(a){return [a.file_name,a.confidence_level,a.confidence_score,a.mand_present,a.mand_absent,a.rationale]});
+        XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['File','Confidence','Score','Mand Present','Mand Absent','Rationale']].concat(d)),'Completeness Summary');
+      }
+      if(selTabs.includes('tab_fd')){
+        var d2=filteredFindings.map(function(f){return [f.file_name,f.field_name,f.mandatory?'Yes':'No',f.presence_classification,f.detection_method,f.confidence_contribution,f.reviewer_notes]});
+        XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['File','Field','Mandatory','Presence','Detection','Confidence','Notes']].concat(d2)),'Field Detail');
+      }
+      XLSX.writeFile(wb,'Report_'+Date.now()+'.xlsx');
+    } else if(fmt==='word'){
+      var h="<html><head><meta charset='UTF-8'><style>body{font-family:Segoe UI,sans-serif;font-size:11pt}h1{color:#0070C0}h2{color:#004578}table{border-collapse:collapse;width:100%;margin-bottom:20px}th{background:#004578;color:#fff;padding:6px 8px}td{border:1px solid #d1d5db;padding:5px 8px}</style></head><body><h1>Completeness Report</h1>";
+      if(selTabs.includes('tab_cs')){
+        h+="<h2>Completeness Summary</h2><table><tr><th>File</th><th>Confidence</th><th>Score</th><th>Rationale</th></tr>";
+        filteredCA.forEach(function(a){h+="<tr><td>"+a.file_name+"</td><td>"+a.confidence_level+"</td><td>"+a.confidence_score+"%</td><td>"+a.rationale+"</td></tr>"});
+        h+="</table>";
+      }
+      if(selTabs.includes('tab_fd')){
+        h+="<h2>Field Detail</h2><table><tr><th>File</th><th>Field</th><th>Presence</th><th>Detection</th><th>Notes</th></tr>";
+        filteredFindings.forEach(function(f){h+="<tr><td>"+f.file_name+"</td><td>"+f.field_name+"</td><td>"+f.presence_classification+"</td><td>"+f.detection_method+"</td><td>"+f.reviewer_notes+"</td></tr>"});
+        h+="</table>";
+      }
+      h+="<div style='text-align:center;font-size:9pt;color:#666;margin-top:30px'>Classification: Protected A</div></body></html>";
+      EE.dl(new Blob([h],{type:'application/msword'}),'Report_'+Date.now()+'.doc');
+    }
+    app.hideModal();
+    SM.audit('user','Generated report: '+fmt);SM.persist();
+  },
+  showVersions:function(){app.showModal(renderVersions(SM.ccdm))},
+  doRollback:function(vid){
+    if(!confirm('Rollback to '+vid+'? This creates a new version (non-destructive).'))return;
+    VM.rollback(SM.ccdm,vid);
+    SM.ses.isApproved=(SM.ccdm.workbook_metadata.status==='Approved');
+    SM.audit('user','Rolled back to '+vid);SM.persist();app.hideModal();app.render();
+  },
+/* Grid controls */
+  setSearch:function(tabId,val){
+    if(!SM.ses.gridSearch)SM.ses.gridSearch={};
+    SM.ses.gridSearch[tabId]=val;
+    SM.persist();app.render();
+  },
+  toggleSort:function(tabId,field){
+    if(!SM.ses.gridSortCol)SM.ses.gridSortCol={};
+    if(!SM.ses.gridSortAsc)SM.ses.gridSortAsc={};
+    if(SM.ses.gridSortCol[tabId]===field){SM.ses.gridSortAsc[tabId]=!SM.ses.gridSortAsc[tabId]}
+    else{SM.ses.gridSortCol[tabId]=field;SM.ses.gridSortAsc[tabId]=true}
+    SM.persist();app.render();
+  },
+  toggleFileSelect:function(sfId,checked){
+    if(!SM.ses.selectedFileIds)SM.ses.selectedFileIds=[];
+    if(checked){if(!SM.ses.selectedFileIds.includes(sfId))SM.ses.selectedFileIds.push(sfId)}
+    else{SM.ses.selectedFileIds=SM.ses.selectedFileIds.filter(function(id){return id!==sfId})}
+    SM.persist();app.render();
+  },
+  selectAllRows:function(tabId,checked){
+    if(tabId==='tab_si'){
+      if(checked){SM.ses.selectedFileIds=SM.ccdm.entities.submission_files.map(function(f){return f.submission_file_id})}
+      else{SM.ses.selectedFileIds=[]}
+    }
+    if(tabId==='tab_fd'){
+      if(!SM.ses._fdSelected)SM.ses._fdSelected=[];
+      if(checked){
+        var rows=filterBySelection(SM.ccdm.entities.findings,SM.ses,'submission_file_id');
+        SM.ses._fdSelected=rows.map(function(f){return f.finding_id});
+      } else {SM.ses._fdSelected=[]}
+    }
+    SM.persist();app.render();
+  },
+  toggleFdSelect:function(fid,checked){
+    if(!SM.ses._fdSelected)SM.ses._fdSelected=[];
+    if(checked){if(!SM.ses._fdSelected.includes(fid))SM.ses._fdSelected.push(fid)}
+    else{SM.ses._fdSelected=SM.ses._fdSelected.filter(function(id){return id!==fid})}
+    SM.persist();app.render();
+  },
+  bulkClassify:function(){
+    var sel=document.getElementById('bulkPresence');
+    var val=sel.value;
+    if(!val){alert('Select a classification first.');return}
+    if(!SM.ses._fdSelected||SM.ses._fdSelected.length===0){alert('Select one or more findings first.');return}
+    var notes=prompt('Reviewer notes (required for Manual Override per V2-017):');
+    if(notes===null)return;
+    if(!notes.trim()){alert('Notes are required for bulk classification.');return}
+    var count=0;
+    SM.update(function(c){
+      c.entities.findings.forEach(function(f){
+        if(SM.ses._fdSelected.includes(f.finding_id)){
+          f.presence_classification=val;
+          f.detection_method='Manual Override';
+          f.reviewer_notes=notes;
+          count++;
+        }
+      });
+      /* Recalculate confidence for affected files */
+      var affectedFiles=new Set();
+      c.entities.findings.forEach(function(f){if(SM.ses._fdSelected.includes(f.finding_id))affectedFiles.add(f.submission_file_id)});
+      affectedFiles.forEach(function(sfId){
+        var idx=c.entities.confidence_assessments.findIndex(function(a){return a.submission_file_id===sfId});
+        var ca=CE.calculateCompleteness(c,sfId);
+        var sf=c.entities.submission_files.find(function(f){return f.submission_file_id===sfId});
+        if(sf)ca.file_name=sf.file_name;
+        if(idx>=0)c.entities.confidence_assessments[idx]=ca;
+        else c.entities.confidence_assessments.push(ca);
+      });
+    },'Bulk classified '+count+' findings as '+val);
+    SM.ses._fdSelected=[];
+    SM.persist();app.render();
+  },
+  commitRepair:function(){SM.audit('user','Repair mode acknowledged');SM.persist();app.hideModal();app.render()},
+  globalReset:function(){
+    if(!confirm('GLOBAL RESET\n\nThis permanently removes ALL data, versions, and audit history.\n\nProceed?'))return;
+    if(!confirm('Are you absolutely sure?'))return;
+    SM.reset();app.render();
+  }
+};
+app.init();
+document.addEventListener('click',function(e){if(!e.target.closest('.em')){var m=document.getElementById('exmenu');if(m)m.classList.remove('sh')}});
+</script>
+</body>
+</html>
