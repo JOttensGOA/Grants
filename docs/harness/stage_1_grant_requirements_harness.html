@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +21,15 @@ body{font-family:var(--font);color:var(--text);background:var(--bg);display:flex
 .card h3{color:var(--goa-blue);margin-bottom:8px;font-size:16px;}
 .card p,.card li{line-height:1.6;color:var(--text-sec);margin-bottom:6px;}
 .card ul{padding-left:20px;}
+/* Breadcrumbs */
+.breadcrumb {
+  font-size: 0.9em;
+  color: var(--goa-blue);
+  margin: 0 0 12px 0;
+}
+.breadcrumb strong {
+  color: var(--goa-blue-dark, var(--goa-blue));
+}
 /* Buttons */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s,box-shadow .15s;}
 .btn:focus-visible{outline:3px solid var(--goa-blue);outline-offset:2px;}
@@ -124,7 +132,14 @@ td[contenteditable="true"]:focus{box-shadow:inset 0 0 0 2px var(--goa-blue);back
 
 <!-- Modals -->
 <div class="modal-overlay" id="modalOverlay"><div class="modal" id="modalContent"></div></div>
-
+<!-- External libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if(window.pdfjsLib){
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+</script>
 <script>
 "use strict";
 
@@ -313,6 +328,35 @@ class StateManager {
     this.session = { phase:"part1_purpose", uploadedFiles:[], config:{mandatoryFields:true,structurePreservation:true}, selectedRow:null, activeTab:"tab_req", validationResults:[], isApproved:false, repairMode:false, repairIssues:[] };
     this.initialize();
   }
+  clearSessionScope(){
+  /* Resets in-session working data while preserving CWDM entities, schema,
+     relationships, views, and version_history (including audit_log and
+     approved version snapshots). Forces the landing page (part1_purpose)
+     on every browser open and resets the draft extraction_config to defaults
+     so the Document Ingestion page opens in its initial state. Approved
+     extraction_configs remain preserved within the version graph snapshots. */
+  this.session = {
+    phase: "part1_purpose",
+    uploadedFiles: [],
+    config: { mandatoryFields: true, structurePreservation: true },
+    selectedRow: null,
+    activeTab: "tab_req",
+    validationResults: [],
+    isApproved: (this.cwdm && this.cwdm.workbook_metadata && this.cwdm.workbook_metadata.status === "Approved"),
+    repairMode: false,
+    repairIssues: []
+  };
+  if(this.cwdm && this.cwdm.workbook_metadata){
+    this.cwdm.workbook_metadata.extraction_config = {
+      document_types: [
+        { type_id: "dt_req", label: "Requirements Checklist", is_present: true, create_tab: true, is_system: true, linked_tab_id: "tab_req" },
+        { type_id: "dt_rubric", label: "Rubric / Scoring Guide", is_present: false, create_tab: false, is_system: true, linked_tab_id: "tab_ac" },
+        { type_id: "dt_elig", label: "Eligible / Ineligible Criteria", is_present: false, create_tab: false, is_system: true, linked_tab_id: "tab_tr" }
+      ]
+    };
+  }
+  this.persist();
+}
 }
 
 /* ================================================================
@@ -647,31 +691,35 @@ class ExportEngine {
    PART 1 CONSTRUCTION — Document Ingestion and Configuration
    ================================================================ */
 class Part1Controller {
-  static renderPurpose(){
-    return '<div class="card"><h2>Purpose and Limitations Statement</h2>'+
-    '<p>Please read the following before proceeding.</p>'+
-    '<h3>Purpose</h3>'+
-    '<p>This Harness extracts requirements, assessment criteria, mandatory fields, evaluation guidance, and document structure from grant application materials. It produces a structured Requirements Workbook that downstream AI systems use to review, score, and evaluate grant submissions.</p>'+
-    '<h3>What the Harness Can Do</h3><ul>'+
-    '<li>Generate structured extraction prompts from uploaded source documents (PDF text extraction, Excel/CSV content reading)</li>'+
-    '<li>Import AI-generated requirements baselines (XLSX or JSON) for structured review</li>'+
-    '<li>Read grant application templates (CSV, DOC, DOCX, XLS, XLSX, PDF)</li>'+
-    '<li>Read assessment rubrics, scoring guides, and reviewer instructions</li>'+
-    '<li>Identify required fields, eligibility criteria, and submission requirements</li>'+
-    '<li>Identify scoring criteria, evaluation categories, and weighting methodologies</li>'+
-    '<li>Preserve the original document structure when requested</li>'+
-    '<li>Generate a structured requirements specification</li>'+
-    '<li>Maintain full traceability from every requirement back to its source document</li></ul>'+
-    '<h3>Recommended Workflow</h3><ul>'+
-    '<li><strong>Step 1:</strong> Upload source documents (application forms, completed submissions, templates)</li>'+
-    '<li><strong>Step 2:</strong> Click "Generate Extraction Prompt" to create an AI-ready prompt with embedded document text</li>'+
-    '<li><strong>Step 3:</strong> Copy the prompt to your AI assistant (Copilot, ChatGPT, etc.) and receive a structured XLSX</li>'+
-    '<li><strong>Step 4:</strong> Click "Import AI Response" to load the XLSX into the Harness for review and validation</li>'+
-    '<li><strong>Step 5:</strong> Review, validate, approve, and export for Stage 2 consumption</li></ul>'+
-    '<h3>User Responsibility</h3>'+
-    '<p>Users must review all generated outputs before operational use. The Harness is an extraction and structuring tool, not a substitute for human judgment on policy intent, regulatory interpretation, or assessment design.</p>'+
-    '<h3>System Output</h3>'+
-    '<p>The output is a token-efficient HTML/JavaScript-based implementation of the AI Grant Requirements Harness. All exports (Excel, JSON, PDF, Word) are secondary serialized representations of the CWDM state.</p>'+
+  static renderPurpose(cwdm){
+    let approvedCount = 0;
+    if(cwdm && cwdm.version_history && cwdm.version_history.version_graph){
+      approvedCount = cwdm.version_history.version_graph.filter(v => v.validation_status === "Pass" && v.origin_type !== "Imported").length;
+    }
+    let notice = "";
+    if(approvedCount > 0){
+      notice = '<div style="background:var(--goa-light);border:1px solid var(--goa-blue);border-radius:6px;padding:12px 16px;margin-top:16px;text-align:center;">' +
+        '<strong>' + approvedCount + ' approved version(s) available from previous sessions.</strong> ' +
+        '<button class="btn btn-secondary btn-sm" onclick="app.showVersionHistory()">View Version History</button>' +
+        '</div>';
+    }
+    return '<div class="card"><h2>Purpose and Limitations Statement</h2>' +
+    '<p>Please read the following before proceeding.</p>' +
+    '<h3>Purpose</h3>' +
+    '<p>This Harness extracts requirements, assessment criteria, mandatory fields, evaluation guidance, and document structure from grant application materials. It produces a structured Requirements Workbook that downstream AI systems use to review, score, and evaluate grant submissions.</p>' +
+    '<h3>What the Harness Can Do</h3><ul>' +
+    '<li>Generate structured extraction prompts from uploaded source documents (PDF text extraction, Excel/CSV content reading)</li>' +
+    '<li>Import AI-generated requirements baselines (XLSX or JSON) for structured review</li>' +
+    '<li>Read grant application templates (CSV, DOC, DOCX, XLS, XLSX, PDF)</li>' +
+    '<li>Read assessment rubrics, scoring guides, and reviewer instructions</li>' +
+    '<li>Identify required fields, eligibility criteria, and submission requirements</li>' +
+    '<li>Identify scoring criteria, evaluation categories, and weighting methodologies</li>' +
+    '<li>Preserve the original document structure when requested</li>' +
+    '<li>Generate a structured requirements specification</li>' +
+    '<li>Maintain full traceability from every requirement back to its source document</li></ul>' +
+       '<h3>User Responsibility</h3>' +
+    '<p>Users must review all generated outputs before operational use. The Harness is an extraction and structuring tool, not a substitute for human judgment on policy intent, regulatory interpretation, or assessment design.</p>' +
+       notice +
     '<div class="mt-16 text-center"><button class="btn btn-primary" onclick="app.part1Acknowledge()">I Understand &mdash; Proceed</button></div></div>';
   }
   static renderUpload(session){
@@ -679,12 +727,30 @@ class Part1Controller {
     const cfg = session.config;
     let fileListHtml="";
     files.forEach((f,i)=>{
-      const ext=f.name.split(".").pop().toLowerCase();
-      const valid=["csv","pdf","doc","docx","xls","xlsx"].includes(ext);
-      fileListHtml+='<div class="file-item"><span>&#128196; '+f.name+' ('+Math.round(f.size/1024)+' KB)</span><span class="status '+(valid?"valid":"invalid")+'">'+(valid?"Valid":"Unsupported")+'</span><span class="remove" onclick="app.removeFile('+i+')">&times;</span></div>';
-    });
-    return '<div class="card"><h2>Document Ingestion</h2>'+
-    '<h3>Upload Source Documents</h3>'+
+  const ext=f.name.split(".").pop().toLowerCase();
+  const supported=["csv","pdf","doc","docx","xls","xlsx"].includes(ext);
+  let statusClass, statusText;
+  if(!supported){
+    statusClass="invalid";
+    statusText="Unsupported";
+  } else if(f.readable===null||f.readable===undefined){
+    statusClass="checking";
+    statusText="Checking...";
+  } else if(f.readable===true){
+    statusClass="valid";
+    statusText="Readable";
+  } else {
+    statusClass="invalid";
+    statusText=f.readability_note||"Unreadable";
+  }
+  fileListHtml+='<div class="file-item"><span>&#128196; '+f.name+' ('+Math.round(f.size/1024)+' KB)</span><span class="status '+statusClass+'">'+statusText+'</span><span class="remove" onclick="app.removeFile('+i+')">&times;</span></div>';
+});
+    return '<div class="card">' +
+  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+    '<h2 style="margin:0;">Document Ingestion</h2>' +
+    '<button class="btn btn-danger" onclick="app.globalReset()">Global Reset</button>' +
+  '</div>' +
+    '<p class="breadcrumb"><strong>Upload files</strong> &rsaquo; <strong>Generate extraction</strong></p>'+
     '<div class="drop-zone" id="dropZone" ondrop="app.handleDrop(event)" ondragover="app.handleDragOver(event)" ondragleave="app.handleDragLeave(event)">'+
     '<p>&#128206; Drag &amp; drop files here or click to browse</p>'+
     '<p class="text-sm text-muted">Supported: CSV, PDF, DOC, DOCX, XLS, XLSX</p>'+
@@ -705,9 +771,9 @@ class Part1Controller {
     '<button class="btn btn-secondary btn-sm mt-8" onclick="app.resetConfig()">Reset Configuration</button>'+
     '</div>'+
     '<div class="text-center mt-16" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">'+
-    '<button class="btn btn-primary" onclick="app.generateExtractionPrompt()" '+(files.length===0?"disabled":"")+'>&#129302; Generate Extraction Prompt</button>'+
-    '<button class="btn btn-secondary" onclick="app.showAIResponseImport()">&#128229; Import AI Response</button>'+
-    '<button class="btn btn-secondary" onclick="app.part1Extract()" '+(files.length===0?"disabled":"")+'>&#9654; Basic Extraction (Built-in)</button>'+
+    '<button class="btn btn-primary" onclick="app.generateExtractionPrompt()" '+(files.length===0?"disabled":"")+'>Generate Extraction Prompt</button>'+
+    '<button class="btn btn-secondary" onclick="app.showAIResponseImport()">Import AI Response</button>'+
+    '<button class="btn btn-secondary" onclick="app.part1Extract()" '+(files.length===0?"disabled":"")+'>Prepare Requirements</button>'+
     '</div>';
   }
   static renderSummary(stats){
@@ -1004,17 +1070,20 @@ class Part3Controller {
    ================================================================ */
 class App {
   constructor(){
-    this.sm = new StateManager();
-    this._fileStore = {};
-    if(!this.sm.load()){ this.sm.initialize(); }
-    this.extractionStats = null;
-    this._repairIssues = [];
-  }
+  this.sm = new StateManager();
+  this._fileStore = {};
+  if(!this.sm.load()){ this.sm.initialize(); }
+  /* Force landing page on every browser open and clear session-scoped working data.
+     CWDM, version graph, and audit log are preserved. */
+  this.sm.clearSessionScope();
+  this.extractionStats = null;
+  this._repairIssues = [];
+}
   render(){
     const s = this.sm.getSession();
     const el = document.getElementById("app");
     switch(s.phase){
-      case "part1_purpose": el.innerHTML = Part1Controller.renderPurpose(); break;
+      case "part1_purpose": el.innerHTML = Part1Controller.renderPurpose(this.sm.cwdm); break;
       case "part1_upload":  el.innerHTML = Part1Controller.renderUpload(s); this._initDropZone(); break;
       case "part1_summary": el.innerHTML = Part1Controller.renderSummary(this.extractionStats||{requirements:0,criteria:0,traceability:0,files:0}); break;
       case "part2": el.innerHTML = Part2Controller.renderWorkbook(this.sm.cwdm, s); break;
@@ -1032,17 +1101,79 @@ class App {
   handleDrop(e){
     e.preventDefault(); e.currentTarget.classList.remove("dragover");
     const files = Array.from(e.dataTransfer.files);
-    files.forEach(f=>this.sm.session.uploadedFiles.push({name:f.name,size:f.size,type:f.type,_file:f}));
-    files.forEach(f=>{this._fileStore[f.name]=f;});
+    files.forEach(f=>{
+      this._fileStore[f.name]=f;
+      this.sm.session.uploadedFiles.push({name:f.name, size:f.size, type:f.type, readable:null, readability_note:null});
+      this._probeReadability(f.name);
+    });
     this.sm.persist(); this.render();
   }
     handleFileSelect(e){
     const files = Array.from(e.target.files);
-    files.forEach(f=>this.sm.session.uploadedFiles.push({name:f.name,size:f.size,type:f.type,_file:f}));
-    files.forEach(f=>{this._fileStore[f.name]=f;});
+    files.forEach(f=>{
+      this._fileStore[f.name]=f;
+      this.sm.session.uploadedFiles.push({name:f.name, size:f.size, type:f.type, readable:null, readability_note:null});
+      this._probeReadability(f.name);
+    });
     this.sm.persist(); this.render();
   }
   removeFile(i){ this.sm.session.uploadedFiles.splice(i,1); this.sm.persist(); this.render(); }
+async _probeReadability(fileName){
+    const fileMeta = this.sm.session.uploadedFiles.find(f=>f.name===fileName);
+    const rawFile = this._fileStore[fileName];
+    if(!fileMeta || !rawFile){ return; }
+    const ext = fileName.split('.').pop().toLowerCase();
+    /* Non-PDF supported formats are always considered readable for the badge. */
+    if(['csv','xls','xlsx','doc','docx'].includes(ext)){
+      fileMeta.readable = true;
+      fileMeta.readability_note = null;
+      this.sm.persist(); this.render();
+      return;
+    }
+    /* PDF probe: check for a usable text layer. */
+    if(ext === 'pdf'){
+      if(!window.pdfjsLib){
+        fileMeta.readable = false;
+        fileMeta.readability_note = 'PDF library not loaded';
+        this.sm.persist(); this.render();
+        return;
+      }
+      try{
+        const buf = await rawFile.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+        let text = '';
+        const pagesToProbe = Math.min(pdf.numPages, 3);
+        for(let p=1; p<=pagesToProbe; p++){
+          const page = await pdf.getPage(p);
+          const content = await page.getTextContent();
+          text += content.items.map(i=>i.str).join(' ') + '\n';
+        }
+        const xfaPhrases = [
+          'Please wait',
+          'cannot be opened using your web browser',
+          'this PDF cannot be displayed',
+          'upgrade to the latest version of Adobe Reader',
+          'Open the form using Acrobat',
+          'If this message is not eventually replaced'
+        ];
+        const looksLikeXfa = xfaPhrases.some(phrase => text.includes(phrase));
+        if(text.trim().length > 50 && !looksLikeXfa){
+          fileMeta.readable = true;
+          fileMeta.readability_note = null;
+        } else if(looksLikeXfa){
+          fileMeta.readable = false;
+          fileMeta.readability_note = 'Unreadable: XFA PDF (Acrobat-only form)';
+        } else {
+          fileMeta.readable = false;
+          fileMeta.readability_note = 'Unreadable: PDF has no extractable text';
+        }
+      } catch(err){
+        fileMeta.readable = false;
+        fileMeta.readability_note = 'Unreadable: ' + err.message;
+      }
+      this.sm.persist(); this.render();
+    }
+  }
   clearFiles(){ this.sm.session.uploadedFiles=[]; this.sm.persist(); this.render(); }
   renderDocumentTypes(){
     const ec=this.sm.cwdm.workbook_metadata.extraction_config;
