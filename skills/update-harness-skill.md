@@ -22,7 +22,7 @@ python3 -m http.server 8000 --directory harness
 5. Push to a feature branch and open a PR. In the PR description include links to the changed page(s) (path under `harness/`) and the local verification steps.
 
 Example prompt for the skill
-"Update the heading and wording on `harness/stage_1_grant_requirements_harness.html` to clarify eligibility — keep layout unchanged. Verify locally and prepare a PR with testing notes."
+- Update the heading and wording on `harness/stage_1.html` to clarify eligibility — keep layout unchanged. Verify locally and prepare a PR with testing notes.
 
 PR checklist for the agent to populate automatically
 - Files changed: list
