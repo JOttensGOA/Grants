@@ -19,8 +19,8 @@ jobs:
       - name: Run harness smoke test
         run: |
           set -e
-          echo "Starting local static server from harness/ on port 8000"
-          python3 -m http.server 8000 --directory harness &
+          echo "Starting local static server from docs/ on port 8000"
+          python3 -m http.server 8000 --directory docs &
           server_pid=$!
           sleep 1
           echo "Checking http://localhost:8000/"

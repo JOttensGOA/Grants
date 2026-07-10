@@ -8,10 +8,10 @@ Source of truth
 
 Quick commands
 - Local smoke test: `python3 -m http.server 8000 --directory harness`
-- Publish: pushes to `main` trigger GitHub Actions to deploy `harness/` to Netlify (see `netlify.toml`).
+- Publish: pushes to `main` trigger GitHub Actions to deploy `docs/` to Netlify (see `netlify.toml`).
 
 Key files and directories
-- [harness/](harness/) — static site exported to Netlify; primary UI harness files.
+- [docs/](docs/) — static site exported to Netlify and GitHub Pages; primary UI harness files.
 - [docs/](docs/) — documentation and static pages used by the project.
 - [grant_req_templates/](grant_req_templates/) — templates and canonical requirement definitions.
 - `netlify.toml` — Netlify publish config (publishes from `harness`).
