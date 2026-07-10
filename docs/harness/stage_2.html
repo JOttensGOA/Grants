@@ -79,7 +79,7 @@ select{font-size:13px}
 </style>
 </head>
 <body>
-<div class="hdr">Government of Alberta - Grant Submission Completeness Review - Stage 2</div>
+<div class="hdr">Government of Alberta - Grant Submission Completeness Review</div>
 <div id="app"></div>
 <div class="mo" id="mo"><div class="md" id="mc"></div></div>
 <div class="ftr">Classification: Protected A</div>
@@ -236,11 +236,11 @@ var SM={
   _fileStore:{},
   init:function(){
     SM.ccdm=CCDM.createEmpty();
-    SM.ses={phase:'p1_purpose',s1Files:[],subFiles:[],activeTab:'tab_cs',selRow:null,valResults:[],isApproved:false,isLocked:false,sortMode:'upload',scanStats:null,selectedFileIds:[],gridSearch:{},gridSortCol:{},gridSortAsc:{}};
+    SM.ses={phase:'p1_purpose',s1Files:[],subFiles:[],activeTab:'tab_cs',selRow:null,valResults:[],isApproved:false,isLocked:false,sortMode:'upload',scanStats:null,selectedFileIds:[],gridSearch:{},gridSortCol:{},gridSortAsc:{},reportConfig:RB.defaultConfig()};
     SM.persist();
   },
   persist:function(){try{localStorage.setItem('goa_s2_c',JSON.stringify(SM.ccdm));localStorage.setItem('goa_s2_s',JSON.stringify(SM.ses))}catch(e){}},
-  load:function(){try{var c=localStorage.getItem('goa_s2_c'),s=localStorage.getItem('goa_s2_s');if(c&&s){SM.ccdm=JSON.parse(c);CCDM.syncCounters(SM.ccdm);SM.ses=JSON.parse(s);if(!SM.ses._baselineFilter)SM.ses._baselineFilter='All';if(!SM.ses._baselineSortCol)SM.ses._baselineSortCol='template';if(!SM.ses._baselineSortDir)SM.ses._baselineSortDir='asc';if(!SM.ses.gridSearch)SM.ses.gridSearch={};if(!SM.ses.gridSortCol)SM.ses.gridSortCol={};if(!SM.ses.gridSortAsc)SM.ses.gridSortAsc={};if(!SM.ses.selectedFileIds)SM.ses.selectedFileIds=[];if(SM.ses.phase==='p1_profile')SM.ses.phase='p1_config';if(!SM.ccdm.scan_configuration.optional_threshold)SM.ccdm.scan_configuration.optional_threshold=75;if(!SM.ses._scanSortCol)SM.ses._scanSortCol='name';if(!SM.ses._scanSortDir)SM.ses._scanSortDir='asc';return true}}catch(e){}return false},
+  load:function(){try{var c=localStorage.getItem('goa_s2_c'),s=localStorage.getItem('goa_s2_s');if(c&&s){SM.ccdm=JSON.parse(c);CCDM.syncCounters(SM.ccdm);SM.ses=JSON.parse(s);if(!SM.ses._baselineFilter)SM.ses._baselineFilter='All';if(!SM.ses._baselineSortCol)SM.ses._baselineSortCol='template';if(!SM.ses._baselineSortDir)SM.ses._baselineSortDir='asc';if(!SM.ses.gridSearch)SM.ses.gridSearch={};if(!SM.ses.gridSortCol)SM.ses.gridSortCol={};if(!SM.ses.gridSortAsc)SM.ses.gridSortAsc={};if(!SM.ses.selectedFileIds)SM.ses.selectedFileIds=[];if(SM.ses.phase==='p1_profile')SM.ses.phase='p1_config';if(!SM.ccdm.scan_configuration.optional_threshold)SM.ccdm.scan_configuration.optional_threshold=75;if(!SM.ses._scanSortCol)SM.ses._scanSortCol='name';if(!SM.ses._scanSortDir)SM.ses._scanSortDir='asc';if(!SM.ses.reportConfig||SM.ses.reportConfig._v!==8)SM.ses.reportConfig=RB.defaultConfig();return true}}catch(e){}return false},
   update:function(fn,desc){
     if(SM.ses.isApproved&&desc!=='force')return false;
     fn(SM.ccdm);
@@ -615,6 +615,566 @@ var EE={
 };
 
 /* ================================================================
+   REPORT BUILDER (RB)
+   Full-screen Per-File Detail and Field Detail report builder.
+   Accessed from Scan Complete view via Build Report button.
+   Generates filtered/sorted exports as CSV, XLSX, Word, or PDF.
+   ================================================================ */
+var RB={
+  defaultTitle:'Grant Submission Completeness Report \u2014 Per-File Detail',
+  /* === Per-File label dictionary: known field IDs get friendly labels and default-on flags === */
+  perFileLabelMap:{
+    file_name:{label:'File Name',def:true},
+    template:{label:'Template',def:true,requiresTemplates:true},
+    pct:{label:'Completeness (%)',def:true,suffix:'%'},
+    status:{label:'Status',def:true},
+    gapCount:{label:'Gap Count',def:true},
+    gap:{label:'Gap',def:true,multiline:true},
+    mand_present:{label:'Mandatory Present',def:false},
+    mand_absent:{label:'Mandatory Absent',def:false},
+    mand_partial:{label:'Mandatory Partial',def:false},
+    mand_total:{label:'Mandatory Total',def:false},
+    opt_present:{label:'Optional Present',def:false},
+    opt_absent:{label:'Optional Absent',def:false},
+    opt_total:{label:'Optional Total',def:false},
+    opt_pct:{label:'Optional Completeness (%)',def:false,suffix:'%'},
+    confidence_level:{label:'Confidence Level',def:false},
+    confidence_score:{label:'Confidence Score',def:false},
+    rationale:{label:'Rationale',def:false},
+    scan_timestamp:{label:'Scanned Timestamp',def:false},
+    user_notes:{label:'User Notes',def:false},
+    indeterminate_count:{label:'Indeterminate Count',def:false},
+    completeness_pct:{label:'Completeness (%)',def:true,suffix:'%'},
+    completeness_status:{label:'Status',def:true},
+    matched_template:{label:'Template',def:false,requiresTemplates:true},
+    file_type:{label:'File Type',def:false},
+    sheet_count:{label:'Sheets',def:false},
+    processing_status:{label:'Processing Status',def:false},
+    override_level:{label:'Override Level',def:false},
+    override_rationale:{label:'Override Rationale',def:false},
+    indeterminate_fields:{label:'Indeterminate Fields',def:false},
+    key_absent:{label:'Key Absent',def:false},
+    key_partial:{label:'Key Partial',def:false}
+  },
+  /* === Per-File synthetic computed fields (not on raw records - combined/derived by harness) === */
+  perFileSyntheticIds:['gap','gapCount','pct','status','template','file_name'],
+  /* === Fields suppressed from the picker (internal/structural) === */
+  perFileSuppressedIds:['submission_file_id','sort_order','gap_mandatory','gap_optional'],
+  /* === Humanize an unknown field ID into a friendly label === */
+  _humanize:function(id){
+    return id.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()});
+  },
+  /* === Field Detail computed columns === */
+  fieldDetailComputedCols:[
+    {id:'file_name',label:'File Name',def:true,src:'computed'},
+    {id:'template',label:'Template',def:true,src:'computed',requiresTemplates:true},
+    {id:'presence_classification',label:'Presence',def:true,src:'computed'},
+    {id:'detection_method',label:'Detection',def:false,src:'computed'},
+    {id:'confidence_contribution',label:'Confidence Contribution',def:false,src:'computed'},
+    {id:'extracted_value',label:'Extracted Value',def:false,src:'computed'},
+    {id:'reviewer_notes',label:'Key Considerations',def:false,src:'computed'}
+  ],
+  /* === Stage 1 field metadata catalog === */
+  stage1FieldCatalog:[
+    {id:'requirement_id',label:'Requirement ID',src:'stage1'},
+    {id:'field_name',label:'Field Name',src:'stage1',def:true},
+    {id:'mandatory',label:'Mandatory',src:'stage1',def:true},
+    {id:'field_type',label:'Field Type',src:'stage1'},
+    {id:'section_id',label:'Section',src:'stage1'},
+    {id:'evidence_requirements',label:'Evidence Requirements',src:'stage1'},
+    {id:'reviewer_guidance',label:'Reviewer Guidance',src:'stage1'},
+    {id:'complexity_flag',label:'Complexity',src:'stage1'}
+  ],
+  /* === Discover which Stage 1 fields actually have data === */
+  discoverStage1Fields:function(c){
+    var reqs=(c&&c.requirements_baseline&&c.requirements_baseline.requirements)||[];
+    var profs=(c&&c.requirements_baseline&&c.requirements_baseline.field_profile)||[];
+    if(reqs.length===0)return [];
+    return RB.stage1FieldCatalog.filter(function(catCol){
+      if(catCol.id==='complexity_flag'){
+        return profs.some(function(p){return p.complexity_flag&&String(p.complexity_flag).trim()!==''});
+      }
+      return reqs.some(function(r){
+        var v=r[catCol.id];
+        if(typeof v==='boolean')return true;
+        return v!=null&&String(v).trim()!=='';
+      });
+    });
+  },
+  perFileColsAvailable:function(c){
+    /* Discover Per-File columns from data shape + synthetic fields (Path C) */
+    var hasTemplates=RB.distinctTemplates(c).length>=2;
+    var discovered={};
+    /* Step 1: inspect confidence_assessments record shape */
+    var cas=(c&&c.entities&&c.entities.confidence_assessments)||[];
+    cas.forEach(function(rec){
+      Object.keys(rec).forEach(function(k){discovered[k]=true});
+    });
+    /* Step 2: inspect submission_files record shape */
+    var subs=(c&&c.entities&&c.entities.submission_files)||[];
+    subs.forEach(function(rec){
+      Object.keys(rec).forEach(function(k){discovered[k]=true});
+    });
+    /* Step 3: add synthetic computed-only fields */
+    RB.perFileSyntheticIds.forEach(function(id){discovered[id]=true});
+    /* Step 4: remove suppressed fields */
+    RB.perFileSuppressedIds.forEach(function(id){delete discovered[id]});
+    /* Step 5: build column definitions, applying label map or humanized fallback */
+    var cols=[];
+    var aliases={completeness_pct:'pct',completeness_status:'status',matched_template:'template'};
+    var seen={};
+    Object.keys(discovered).forEach(function(id){
+      var canonical=aliases[id]||id;
+      if(seen[canonical])return;
+      seen[canonical]=true;
+      /* If id is an alias, use canonical id for the column (so data lookup works on synthetic field) */
+      var useId=aliases[id]?canonical:id;
+      var meta=RB.perFileLabelMap[useId]||RB.perFileLabelMap[id]||{};
+      var col={
+        id:useId,
+        label:meta.label||RB._humanize(useId),
+        def:meta.def===true,
+        src:'computed'
+      };
+      if(meta.multiline)col.multiline=true;
+      if(meta.suffix)col.suffix=meta.suffix;
+      if(meta.requiresTemplates&&!hasTemplates)return;
+      cols.push(col);
+    });
+    /* Step 6: order known fields first (dictionary order), unknowns appended alphabetically */
+    var dictOrder=Object.keys(RB.perFileLabelMap);
+    cols.sort(function(a,b){
+      var ai=dictOrder.indexOf(a.id);
+      var bi=dictOrder.indexOf(b.id);
+      if(ai<0&&bi<0)return a.label.localeCompare(b.label);
+      if(ai<0)return 1;
+      if(bi<0)return -1;
+      return ai-bi;
+    });
+    return cols;
+  },
+  fieldDetailComputedAvailable:function(c){
+    var hasTemplates=RB.distinctTemplates(c).length>=2;
+    return RB.fieldDetailComputedCols.filter(function(col){
+      if(col.requiresTemplates)return hasTemplates;
+      return true;
+    });
+  },
+  composeFileCols:function(c){
+    return RB.perFileColsAvailable(c);
+  },
+  composeFieldCols:function(c){
+    var stage1=RB.discoverStage1Fields(c).map(function(s){return {id:s.id,label:s.label,def:s.def===true,src:'stage1'}});
+    var computed=RB.fieldDetailComputedAvailable(c);
+    var stage1Ids={};stage1.forEach(function(s){stage1Ids[s.id]=true});
+    var merged=stage1.concat(computed.filter(function(co){return !stage1Ids[co.id]}));
+    return merged;
+  },
+  /* === Distinct templates from Stage 1 baseline === */
+  distinctTemplates:function(c){
+    var reqs=(c&&c.requirements_baseline&&c.requirements_baseline.requirements)||[];
+    var set={};
+    reqs.forEach(function(r){
+      var t=r.template_scope||'';
+      if(t&&t!=='Both')set[t]=true;
+    });
+    return Object.keys(set).sort();
+  },
+  /* === Distinct statuses from confidence_assessments (topic-neutral) === */
+  distinctStatuses:function(c){
+    var cas=(c&&c.entities&&c.entities.confidence_assessments)||[];
+    var set={};
+    cas.forEach(function(ca){
+      var s=ca.completeness_status||'';
+      if(s)set[s]=true;
+    });
+    /* Preferred ordering: Complete, Partially Complete, Incomplete, then any others alphabetically */
+    var preferred=['Complete','Partially Complete','Incomplete'];
+    var present=Object.keys(set);
+    var ordered=[];
+    preferred.forEach(function(p){if(set[p]){ordered.push(p);delete set[p]}});
+    Object.keys(set).sort().forEach(function(s){ordered.push(s)});
+    return ordered;
+  },
+  defaultConfig:function(){
+    return {
+      _v:8,
+      detail:'file',
+      filterTemplate:'All',
+      filterStatus:'All',
+      filterPctEnabled:false,
+      filterPctThreshold:75,
+      filterPresence:{Present:true,Absent:true,Partial:true,Indeterminate:true,Excluded:true,'Not Applicable':true},
+      cols:{},
+      sortCol:'',
+      sortDir:'asc',
+      format:'csv',
+      title:RB.defaultTitle,
+      includeDate:true
+    };
+  },
+  initColsForDetail:function(c,detail){
+    var available=detail==='file'?RB.composeFileCols(c):RB.composeFieldCols(c);
+    var cols={};
+    available.forEach(function(col){if(col.def)cols[col.id]=true});
+    return cols;
+  },
+  onDetailChange:function(detail){
+    SM.ses.reportConfig.detail=detail;
+    SM.ses.reportConfig.cols=RB.initColsForDetail(SM.ccdm,detail);
+    var firstCol=(detail==='file'?RB.composeFileCols(SM.ccdm):RB.composeFieldCols(SM.ccdm))[0];
+    SM.ses.reportConfig.sortCol=firstCol?firstCol.id:'';
+    SM.ses.reportConfig.title=detail==='file'
+      ?'Grant Submission Completeness Report \u2014 Per-File Detail'
+      :'Grant Submission Completeness Report \u2014 Field Detail';
+  },
+  /* === Build section-grouped gap text (matches Per-File Detail tab format) === */
+  buildGapText:function(ca){
+    var mandGaps=(ca.gap_mandatory||'').split('; ').filter(function(g){return g!==''});
+    var optGaps=(ca.gap_optional||'').split('; ').filter(function(g){return g!==''});
+    var lines=[];
+    var groupBySection=function(gaps){
+      var bySec={};
+      gaps.forEach(function(g){
+        var secMatch=g.match(/\((?:Partial, )?(.+)\)$/);
+        var sec=secMatch?secMatch[1]:'Unknown';
+        var fname=g.replace(/\s*\((?:Partial, )?.+\)$/,'');
+        if(!bySec[sec])bySec[sec]=[];
+        bySec[sec].push(fname);
+      });
+      return bySec;
+    };
+    if(mandGaps.length>0){
+      lines.push('Mandatory:');
+      var mandBySec=groupBySection(mandGaps);
+      Object.keys(mandBySec).sort().forEach(function(sec){
+        lines.push('- '+sec+': '+mandBySec[sec].join(', '));
+      });
+    }
+    if(optGaps.length>0){
+      lines.push('Optional:');
+      var optBySec=groupBySection(optGaps);
+      Object.keys(optBySec).sort().forEach(function(sec){
+        lines.push('- '+sec+': '+optBySec[sec].join(', '));
+      });
+    }
+    return lines.join('\n');
+  },
+  buildFileRows:function(c){
+    /* Data-driven row builder: pass-through all submission_file and confidence_assessment fields,
+       overlaying synthetic computed fields (template, pct, status, gap, gapCount) at the end. */
+    var subs=c.entities.submission_files;
+    var cas=c.entities.confidence_assessments;
+    return subs.map(function(sf){
+      var ca=cas.find(function(a){return a.submission_file_id===sf.submission_file_id})||{};
+      var mandGapCount=(ca.gap_mandatory||'').split('; ').filter(function(g){return g!==''}).length;
+      var optGapCount=(ca.gap_optional||'').split('; ').filter(function(g){return g!==''}).length;
+      /* Start with all submission_file fields, then overlay confidence_assessment fields */
+      var row={};
+      Object.keys(sf).forEach(function(k){if(RB.perFileSuppressedIds.indexOf(k)<0)row[k]=sf[k]});
+      Object.keys(ca).forEach(function(k){if(RB.perFileSuppressedIds.indexOf(k)<0)row[k]=ca[k]});
+      /* Overlay synthetic computed fields (these always take precedence) */
+      row.file_name=sf.file_name;
+      row.template=sf.template_type||sf.matched_template||sf.file_type||'';
+      row.pct=ca.completeness_pct!=null?ca.completeness_pct:(ca.confidence_score||0);
+      row.status=ca.completeness_status||RB._statusFor(ca,c.scan_configuration);
+      row.gapCount=mandGapCount+optGapCount;
+      row.gap=RB.buildGapText(ca);
+      return row;
+    });
+  },
+  buildFieldRows:function(c){
+    var subs=c.entities.submission_files;
+    var subMap={};subs.forEach(function(sf){subMap[sf.submission_file_id]=sf});
+    var cas=(c.entities&&c.entities.confidence_assessments)||[];
+    var caMap={};cas.forEach(function(ca){caMap[ca.submission_file_id]=ca});
+    var reqs=c.requirements_baseline.requirements;
+    var profs=c.requirements_baseline.field_profile;
+    var reqMap={};reqs.forEach(function(r){reqMap[r.requirement_id]=r});
+    var profMap={};profs.forEach(function(p){profMap[p.requirement_id]=p});
+    return c.entities.findings.map(function(f){
+      var sf=subMap[f.submission_file_id]||{};
+      var ca=caMap[f.submission_file_id]||{};
+      var req=reqMap[f.requirement_id]||{};
+      var prof=profMap[f.requirement_id]||{};
+      return {
+        file_name:f.file_name||sf.file_name||'',
+        template:sf.template_type||sf.matched_template||sf.file_type||'',
+        status:ca.completeness_status||'',
+        presence_classification:f.presence_classification||'',
+        detection_method:f.detection_method||'',
+        confidence_contribution:f.confidence_contribution||0,
+        extracted_value:f.extracted_value||'',
+        reviewer_notes:f.reviewer_notes||'',
+        requirement_id:f.requirement_id||'',
+        field_name:req.field_name||f.field_name||'',
+        mandatory:(req.mandatory!=null?req.mandatory:f.mandatory)?'Yes':'No',
+        field_type:req.field_type||'',
+        section_id:req.section_id||f.section_id||'',
+        evidence_requirements:req.evidence_requirements||'',
+        reviewer_guidance:req.reviewer_guidance||'',
+        complexity_flag:prof.complexity_flag||f.complexity_flag||''
+      };
+    });
+  },
+  _statusFor:function(ca,cfg){
+    if(!ca||typeof ca.confidence_score!=='number')return '';
+    var pct=ca.confidence_score;
+    if(pct>=(cfg&&cfg.threshold_high?cfg.threshold_high:90))return 'Complete';
+    if(pct>=(cfg&&cfg.threshold_medium?cfg.threshold_medium:60))return 'Partially Complete';
+    return 'Incomplete';
+  },
+  applyFilters:function(rows,cfg){
+    var out=rows;
+    if(cfg.filterTemplate&&cfg.filterTemplate!=='All'){
+      out=out.filter(function(r){return r.template===cfg.filterTemplate});
+    }
+    if(cfg.filterStatus&&cfg.filterStatus!=='All'){
+      out=out.filter(function(r){return r.status===cfg.filterStatus});
+    }
+    if(cfg.detail==='file'&&cfg.filterPctEnabled){
+      var t=cfg.filterPctThreshold;
+      out=out.filter(function(r){return (r.pct||0)<t});
+    }
+    if(cfg.detail==='field'&&cfg.filterPresence){
+      out=out.filter(function(r){return cfg.filterPresence[r.presence_classification]!==false});
+    }
+    return out;
+  },
+  applySort:function(rows,cfg){
+    var col=cfg.sortCol;if(!col)return rows;
+    var dir=cfg.sortDir==='desc'?-1:1;
+    return rows.slice().sort(function(a,b){
+      var va=a[col],vb=b[col];
+      if(typeof va==='number'&&typeof vb==='number')return (va-vb)*dir;
+      va=(va==null?'':String(va)).toLowerCase();vb=(vb==null?'':String(vb)).toLowerCase();
+      return va<vb?-1*dir:va>vb?1*dir:0;
+    });
+  },
+  selectedColDefs:function(c,cfg){
+    var available=cfg.detail==='file'?RB.composeFileCols(c):RB.composeFieldCols(c);
+    return available.filter(function(col){return cfg.cols[col.id]});
+  },
+  availableColsForDetail:function(c,detail){
+    return detail==='file'?RB.composeFileCols(c):RB.composeFieldCols(c);
+  },
+  emptyColumns:function(c,detail){
+    var rows=detail==='file'?RB.buildFileRows(c):RB.buildFieldRows(c);
+    var available=RB.availableColsForDetail(c,detail);
+    var empty={};
+    available.forEach(function(col){
+      var hasData=rows.some(function(r){
+        var v=r[col.id];
+        if(typeof v==='boolean'||typeof v==='number')return true;
+        return v!=null&&String(v).trim()!==''&&String(v).trim()!=='0';
+      });
+      if(!hasData)empty[col.id]=true;
+    });
+    return empty;
+  },
+  buildOutputRows:function(c){
+    var cfg=SM.ses.reportConfig;
+    var raw=cfg.detail==='file'?RB.buildFileRows(c):RB.buildFieldRows(c);
+    var filtered=RB.applyFilters(raw,cfg);
+    return RB.applySort(filtered,cfg);
+  },
+  _ts:function(){return new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)},
+  _csvEsc:function(v){if(v==null)return '';var s=String(v);if(/[",\r\n]/.test(s))return '"'+s.replace(/"/g,'""')+'"';return s},
+  /* Convert multi-line value for HTML rendering (preview, Word, PDF) */
+  _htmlMulti:function(v){if(v==null)return '';return RB._htmlEsc(String(v)).replace(/\n/g,'<br>')},
+  /* Apply column-level display formatting (suffix etc) - does not affect underlying value used for sorting */
+  _formatVal:function(v,col){
+    if(v==null||v==='')return '';
+    if(col&&col.suffix)return String(v)+col.suffix;
+    return String(v);
+  },
+  /* === Report Selections helpers (Patch v.3.3.8) === */
+  /* Returns array of [label, value] pairs representing the analyst's selections */
+  _buildSelectionsArray:function(c,cfg){
+    var rows=[];
+    rows.push(['Detail Level', cfg.detail==='file'?'Per-File summary':'Field Detail']);
+    var templates=RB.distinctTemplates(c);
+    if(templates.length>=2){
+      rows.push(['Template Filter', cfg.filterTemplate||'All']);
+    }
+    rows.push(['Status Filter', cfg.filterStatus||'All']);
+    if(cfg.detail==='file'){
+      if(cfg.filterPctEnabled){
+        rows.push(['Optional Completeness Threshold', 'Files below '+cfg.filterPctThreshold+'%']);
+      } else {
+        rows.push(['Optional Completeness Threshold', 'Not applied']);
+      }
+    }
+    if(cfg.detail==='field'){
+      var presKeys=Object.keys(cfg.filterPresence||{});
+      var allOn=presKeys.every(function(k){return cfg.filterPresence[k]!==false});
+      if(allOn){
+        rows.push(['Presence Filter', 'All presence values']);
+      } else {
+        var checked=presKeys.filter(function(k){return cfg.filterPresence[k]!==false});
+        rows.push(['Presence Filter', checked.join(', ')||'None']);
+      }
+    }
+    var cols=RB.selectedColDefs(c,cfg);
+    var sortColDef=cols.find(function(col){return col.id===cfg.sortCol});
+    var sortLabel=sortColDef?sortColDef.label:cfg.sortCol||'';
+    var sortDir=cfg.sortDir==='desc'?'Descending':'Ascending';
+    rows.push(['Sort', sortLabel+' ('+sortDir+')']);
+    var colLabels=cols.map(function(col){return col.label});
+    rows.push(['Columns', colLabels.join(', ')]);
+    var totalRows=cfg.detail==='file'?RB.buildFileRows(c).length:RB.buildFieldRows(c).length;
+    var filteredCount=RB.buildOutputRows(c).length;
+    rows.push(['Showing', filteredCount+' of '+totalRows+' rows']);
+    return rows;
+  },
+  _selectionsAsCSVLines:function(c,cfg){
+    var rows=RB._buildSelectionsArray(c,cfg);
+    return rows.map(function(r){return RB._csvEsc(r[0])+','+RB._csvEsc(r[1])});
+  },
+  _selectionsAsHTML:function(c,cfg){
+    var rows=RB._buildSelectionsArray(c,cfg);
+    var h="<div class='rb-selections' style='margin:14px 0 20px 0;padding:10px 14px;background:#F3F4F6;border-left:4px solid #004578;font-size:10pt'>";
+    h+="<div style='font-weight:600;color:#004578;margin-bottom:6px'>Report Selections</div>";
+    h+="<table style='border-collapse:collapse;font-size:10pt;border:none;width:auto'>";
+    rows.forEach(function(r){
+      h+="<tr><td style='border:none;padding:2px 12px 2px 0;font-weight:600;vertical-align:top;white-space:nowrap'>"+RB._htmlEsc(r[0])+":</td>";
+      h+="<td style='border:none;padding:2px 0;vertical-align:top'>"+RB._htmlEsc(r[1])+"</td></tr>";
+    });
+    h+="</table></div>";
+    return h;
+  },
+  exportCSV:function(c){
+    var cfg=SM.ses.reportConfig;
+    var cols=RB.selectedColDefs(c,cfg);
+    var rows=RB.buildOutputRows(c);
+    var lines=[];
+    lines.push(RB._csvEsc(cfg.title));
+    if(cfg.includeDate)lines.push(RB._csvEsc('Export Date: '+new Date().toLocaleString()));
+    lines.push('');
+    /* Report Selections block (Patch v.3.3.8) */
+    RB._selectionsAsCSVLines(c,cfg).forEach(function(l){lines.push(l)});
+    lines.push('');
+    lines.push(cols.map(function(col){return RB._csvEsc(col.label)}).join(','));
+    rows.forEach(function(r){lines.push(cols.map(function(col){
+      var v=r[col.id];
+      /* Preserve embedded newlines for multi-line cells (CSV reads with quoted CRLF) */
+      if(col.multiline&&v)v=String(v).replace(/\n/g,'\r\n');
+      else v=RB._formatVal(v,col);
+      return RB._csvEsc(v);
+    }).join(','))});
+    var blob=new Blob([lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+    EE.dl(blob,'Stage2_Report_'+RB._ts()+'.csv');
+  },
+  exportXLSX:function(c){
+    if(typeof XLSX==='undefined'){alert('SheetJS not loaded');return}
+    var cfg=SM.ses.reportConfig;
+    var cols=RB.selectedColDefs(c,cfg);
+    var rows=RB.buildOutputRows(c);
+    var aoa=[];
+    aoa.push([cfg.title]);
+    if(cfg.includeDate)aoa.push(['Export Date: '+new Date().toLocaleString()]);
+    aoa.push([]);
+    aoa.push(cols.map(function(col){return col.label}));
+    rows.forEach(function(r){aoa.push(cols.map(function(col){
+      var v=r[col.id];
+      if(col.multiline)return v;
+      if(col.suffix&&v!=null&&v!=='')return String(v)+col.suffix;
+      return v;
+    }))});
+    var wb=XLSX.utils.book_new();
+    var ws=XLSX.utils.aoa_to_sheet(aoa);
+    /* Apply wrap-text style on multi-line columns by adding cell wrap property */
+    var headerRowIdx=cfg.includeDate?3:2;
+    cols.forEach(function(col,colIdx){
+      if(!col.multiline)return;
+      for(var rIdx=headerRowIdx+1;rIdx<headerRowIdx+1+rows.length;rIdx++){
+        var cellRef=XLSX.utils.encode_cell({r:rIdx,c:colIdx});
+        if(ws[cellRef]){
+          ws[cellRef].s={alignment:{wrapText:true,vertical:'top'}};
+        }
+      }
+    });
+    XLSX.utils.book_append_sheet(wb,ws,'Report');
+    /* Add Report Selections worksheet (Patch v.3.3.8) */
+    var selRows=RB._buildSelectionsArray(c,cfg);
+    var selAoa=[];
+    selAoa.push(['Report Selections']);
+    if(cfg.includeDate)selAoa.push(['Export Date: '+new Date().toLocaleString()]);
+    selAoa.push([]);
+    selAoa.push(['Selection','Value']);
+    selRows.forEach(function(r){selAoa.push([r[0],r[1]])});
+    var wsSel=XLSX.utils.aoa_to_sheet(selAoa);
+    wsSel['!cols']=[{wch:32},{wch:60}];
+    XLSX.utils.book_append_sheet(wb,wsSel,'Report Selections');
+    XLSX.writeFile(wb,'Stage2_Report_'+RB._ts()+'.xlsx');
+  },
+  exportWord:function(c){
+    var cfg=SM.ses.reportConfig;
+    var cols=RB.selectedColDefs(c,cfg);
+    var rows=RB.buildOutputRows(c);
+    /* Landscape US Letter page setup via Word XML (Patch v.3.3.8) */
+    var h="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='UTF-8'>";
+    h+="<xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>";
+    h+="<style>";
+    h+="@page Section1{size:11.0in 8.5in;mso-page-orientation:landscape;margin:.5in .5in .5in .5in;mso-header-margin:.5in;mso-footer-margin:.5in}";
+    h+="div.Section1{page:Section1}";
+    h+="body{font-family:Segoe UI,sans-serif;font-size:11pt}h1{color:#0070C0}p.meta{color:#666;font-size:10pt;margin-bottom:8px}table{border-collapse:collapse;width:100%;margin-top:8px}th{background:#004578;color:#fff;padding:6px 8px;font-size:10pt;text-align:left}td{border:1px solid #d1d5db;padding:5px 8px;font-size:10pt;vertical-align:top}.ftr{text-align:center;font-size:9pt;color:#666;margin-top:24px}";
+    h+="</style></head><body><div class='Section1'>";
+    h+="<h1>"+RB._htmlEsc(cfg.title)+"</h1>";
+    if(cfg.includeDate)h+="<p class='meta'>Export Date: "+new Date().toLocaleString()+"</p>";
+    h+="<p class='meta'>Detail Level: "+(cfg.detail==='file'?'Per-File Summary':'Field Detail')+" \u00B7 Rows: "+rows.length+"</p>";
+    /* Report Selections block (Patch v.3.3.8) */
+    h+=RB._selectionsAsHTML(c,cfg);
+    h+="<table><tr>";
+    cols.forEach(function(col){h+="<th>"+RB._htmlEsc(col.label)+"</th>"});
+    h+="</tr>";
+    rows.forEach(function(r){
+      h+="<tr>";
+      cols.forEach(function(col){
+        var v=r[col.id];
+        if(col.multiline)h+="<td>"+RB._htmlMulti(v)+"</td>";
+        else h+="<td>"+RB._htmlEsc(RB._formatVal(v,col))+"</td>";
+      });
+      h+="</tr>";
+    });
+    h+="</table><div class='ftr'>Classification: Protected A - Government of Alberta</div></div></body></html>";
+    EE.dl(new Blob([h],{type:'application/msword'}),'Stage2_Report_'+RB._ts()+'.doc');
+  },
+  exportPDF:function(c){
+    var cfg=SM.ses.reportConfig;
+    var cols=RB.selectedColDefs(c,cfg);
+    var rows=RB.buildOutputRows(c);
+    var w=window.open('','_blank','width=900,height=700');
+    if(!w){alert('Pop-up blocked. Allow pop-ups for this site to generate a PDF.');return}
+    var h="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>"+RB._htmlEsc(cfg.title)+"</title>";
+    /* Landscape US Letter via @page (Patch v.3.3.8) */
+    h+="<style>@page{size:letter landscape;margin:0.5in}body{font-family:Segoe UI,sans-serif;font-size:10pt;margin:24px}h1{color:#004578;margin-bottom:8px}p.meta{color:#666;font-size:10pt;margin-bottom:6px}table{border-collapse:collapse;width:100%;margin-top:8px;font-size:9pt}th{background:#004578;color:#fff;padding:6px 8px;text-align:left;border:1px solid #d1d5db}td{border:1px solid #d1d5db;padding:5px 8px;vertical-align:top}.ftr{text-align:center;font-size:8pt;color:#666;margin-top:20px}@media print{body{margin:0}}</style>";
+    h+="</head><body>";
+    h+="<h1>"+RB._htmlEsc(cfg.title)+"</h1>";
+    if(cfg.includeDate)h+="<p class='meta'>Export Date: "+new Date().toLocaleString()+"</p>";
+    h+="<p class='meta'>Detail Level: "+(cfg.detail==='file'?'Per-File Summary':'Field Detail')+" \u00B7 Rows: "+rows.length+"</p>";
+    /* Report Selections block (Patch v.3.3.8) */
+    h+=RB._selectionsAsHTML(c,cfg);
+    h+="<table><tr>";
+    cols.forEach(function(col){h+="<th>"+RB._htmlEsc(col.label)+"</th>"});
+    h+="</tr>";
+    rows.forEach(function(r){
+      h+="<tr>";
+      cols.forEach(function(col){
+        var v=r[col.id];
+        if(col.multiline)h+="<td>"+RB._htmlMulti(v)+"</td>";
+        else h+="<td>"+RB._htmlEsc(RB._formatVal(v,col))+"</td>";
+      });
+      h+="</tr>";
+    });
+    h+="</table><div class='ftr'>Classification: Protected A - Government of Alberta</div>";
+    h+="<script>window.onload=function(){setTimeout(function(){window.print()},250)}<\/script>";
+    h+="</body></html>";
+    w.document.open();w.document.write(h);w.document.close();
+  },
+  _htmlEsc:function(v){if(v==null)return '';return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+};
+/* ================================================================
    UI RENDERERS
    ================================================================ */
 function presenceBadge(p){var m={Present:'bPr',Absent:'bAb',Partial:'bPa',Excluded:'bEx',Indeterminate:'bIn','Not Applicable':'bEx'};return '<span class="badge '+(m[p]||'bIn')+'">'+p+'</span>'}
@@ -624,7 +1184,7 @@ function renderNav(phase){
   if(phase==='p1_purpose')return '';
   var parts=[];
   parts.push({id:'p1_import',label:'Part 1: Import',phases:['p1_import','p1_summary','p1_profile','p1_config']});
-  parts.push({id:'p2_upload',label:'Part 2: Submissions',phases:['p2_upload','p2_summary']});
+  parts.push({id:'p2_upload',label:'Part 2: Submissions',phases:['p2_upload','p2_summary','p2_report']});
   parts.push({id:'p3',label:'Part 3: Workbook',phases:['p3']});
   var html='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 16px;background:var(--w);border:1px solid var(--gb);border-radius:8px">';
   parts.forEach(function(p,i){
@@ -668,20 +1228,24 @@ function renderPurpose(){
 
 function renderImport(ses){
   var fHtml='';
+  var anyUnsupported=false;
   ses.s1Files.forEach(function(f,i){
     var ext=f.name.split('.').pop().toLowerCase();
-    var ok=['json','xlsx','xls','doc','docx','pdf'].includes(ext);
-    fHtml+='<div class="fi"><span class="n">'+f.name+' ('+Math.round(f.size/1024)+' KB)</span><span style="color:'+(ok?'var(--g)':'var(--r)')+'">'+
+    var ok=['json','xlsx'].includes(ext);
+    if(!ok)anyUnsupported=true;
+    fHtml+='<div class="fi"><span class="n">'+f.name+' ('+Math.round(f.size/1024)+' KB)</span><span style="color:'+(ok?'var(--g)':'var(--r)')+';font-weight:600">'+
     (ok?'Valid':'Unsupported')+'</span><button class="btn btn-r btn-sm" onclick="app.removeS1('+i+')">&times;</button></div>';
   });
+  var canImport=ses.s1Files.length>0&&!anyUnsupported;
   return '<div class="card"><h1>Part 1: Import Requirements Baseline</h1>'+
-  '<h3>Upload Stage 1 Export</h3><p>Import the approved Requirements Workbook from Stage 1. Supported formats: JSON (lossless), Excel (.xlsx).</p>'+
+  '<h3>Upload Stage 1 Export</h3><p>Import the approved Requirements Workbook from Stage 1. Supported formats: JSON (lossless) and Excel (.xlsx).</p>'+
   '<div class="dz" id="s1dz" ondrop="app.handleS1Drop(event)" ondragover="event.preventDefault();this.classList.add(\'ov\')" ondragleave="this.classList.remove(\'ov\')">'+
   '<p>Drag &amp; drop Stage 1 export here or click to browse</p>'+
-  '<p style="font-size:12px">JSON, XLSX, XLS, DOC, DOCX, PDF</p>'+
-  '<input type="file" id="s1input" accept=".json,.xlsx,.xls,.doc,.docx,.pdf" style="display:none" onchange="app.handleS1Select(event)"></div>'+
+  '<p style="font-size:12px">JSON, XLSX</p>'+
+  '<input type="file" id="s1input" accept=".json,.xlsx" style="display:none" onchange="app.handleS1Select(event)"></div>'+
   fHtml+
-  '<div class="tc" style="margin-top:16px"><button class="btn btn-p" onclick="app.importS1()"'+(ses.s1Files.length===0?' disabled':'')+'>Import Baseline</button></div></div>';
+  (anyUnsupported?'<p style="font-size:12px;color:var(--r);margin-top:8px">Remove unsupported files before importing the baseline.</p>':'')+
+  '<div class="tc" style="margin-top:16px"><button class="btn btn-p" onclick="app.importS1()"'+(!canImport?' disabled':'')+'>Import Baseline</button></div></div>';
 }
 /* Baseline Summary */
 function renderBaselineSummary(c){
@@ -980,6 +1544,7 @@ function renderScanSummary(c,s){
   html+='<span style="font-size:12px;color:var(--gr)">'+filtered.length+' of '+fileRows.length+' files</span>';
   html+='<span style="flex:1"></span>';
   html+='<button class="btn btn-s btn-sm" onclick="app.navTo(\'p2_upload\')">&laquo; Back to Submissions</button>';
+  html+='<button class="btn btn-p btn-sm" onclick="app.openReportBuilder()" title="Build a custom report of Per-File Detail or Field Detail">Build Report</button>';
   html+='<button class="btn btn-g btn-sm" onclick="app.goToPart3()">&#9654; Proceed to Workbook</button>';
   html+='</div>';
 
@@ -1016,6 +1581,19 @@ function renderScanSummary(c,s){
 /* ================================================================
    RENDER GRID
    ================================================================ */
+function getTabData(c,tabId){
+  if(tabId==='tab_cs')return c.entities.confidence_assessments;
+  if(tabId==='tab_fd')return c.entities.findings;
+  if(tabId==='tab_cr')return c.entities.confidence_assessments;
+  if(tabId==='tab_si')return c.entities.submission_files;
+  if(tabId==='tab_rb'){
+    return c.requirements_baseline.requirements.map(function(r){
+      var p=c.requirements_baseline.field_profile.find(function(fp){return fp.requirement_id===r.requirement_id})||{};
+      return Object.assign({},r,{included_in_scan:p.included_in_scan!==false,complexity_flag:p.complexity_flag||''});
+    });
+  }
+  return [];
+}
 function renderGrid(c,ses,tabId){
   var cols=CCDM.defaultColumns().filter(function(col){return col.tab===tabId});
   var rows=getTabData(c,tabId);
@@ -1240,6 +1818,150 @@ function renderReportBuilder(){
   return html;
 }
 
+function renderReportBuilderFull(c,ses){
+  var cfg=ses.reportConfig||RB.defaultConfig();
+  ses.reportConfig=cfg;
+  /* If cols are empty (e.g., first time on this detail level), initialize defaults */
+  if(!cfg.cols||Object.keys(cfg.cols).length===0){
+    cfg.cols=RB.initColsForDetail(c,cfg.detail);
+    if(!cfg.sortCol){
+      var first=(cfg.detail==='file'?RB.composeFileCols(c):RB.composeFieldCols(c))[0];
+      cfg.sortCol=first?first.id:'';
+    }
+  }
+  var rows=RB.buildOutputRows(c);
+  var cols=RB.selectedColDefs(c,cfg);
+  var rawCount=cfg.detail==='file'?RB.buildFileRows(c).length:RB.buildFieldRows(c).length;
+
+  /* === Template filter sourced from Stage 1 baseline (topic-neutral) === */
+  var templates=RB.distinctTemplates(c);
+  var hasMultipleTemplates=templates.length>=2;
+
+  /* === Available columns for this detail level, with empty-column suppression === */
+  var allCols=RB.availableColsForDetail(c,cfg.detail);
+  var emptyMap=RB.emptyColumns(c,cfg.detail);
+  /* Filter out columns with no data anywhere (Complexity hidden when empty etc) */
+  var visibleCols=allCols.filter(function(col){return !emptyMap[col.id]});
+
+  var html='<div class="card">';
+  html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">';
+  html+='<button class="btn btn-s btn-sm" onclick="app.closeReportBuilder()">&laquo; Back to Scan Complete</button>';
+  html+='<h1 style="margin:0;flex:1">Report Builder</h1>';
+  html+='</div>';
+  html+='<p>Build a custom report of the scanned submissions to address deficiencies offline. Configure the detail level, filters, columns, sort, and format below. The preview updates as you adjust the configuration.</p>';
+
+  /* DETAIL LEVEL */
+  html+='<h3>Detail Level</h3>';
+  html+='<div style="display:flex;gap:18px;margin:6px 0 14px">';
+  html+='<label><input type="radio" name="rbDetail" value="file"'+(cfg.detail==='file'?' checked':'')+' onchange="app.updateReportConfig(\'detail\',\'file\')"> Per-File summary (one row per file)</label>';
+  html+='<label><input type="radio" name="rbDetail" value="field"'+(cfg.detail==='field'?' checked':'')+' onchange="app.updateReportConfig(\'detail\',\'field\')"> Field Detail (one row per field per file)</label>';
+  html+='</div>';
+
+  /* TITLE AND DATE */
+  html+='<h3>Report Title and Date</h3>';
+  html+='<div style="display:flex;gap:12px;align-items:center;margin:6px 0 14px;flex-wrap:wrap">';
+  html+='<label style="font-size:13px;font-weight:600;color:var(--gr)">Title:</label>';
+  html+='<input type="text" id="rbTitle" value="'+RB._htmlEsc(cfg.title)+'" oninput="app.updateReportConfig(\'title\',this.value)" style="flex:1;min-width:280px;padding:4px 8px;border:1px solid var(--gb);border-radius:4px;font-size:13px">';
+  html+='<label style="font-size:13px"><input type="checkbox"'+(cfg.includeDate?' checked':'')+' onchange="app.updateReportConfig(\'includeDate\',this.checked)"> Include export date</label>';
+  html+='</div>';
+
+  /* FILTERS */
+  html+='<h3>Filters</h3>';
+  /* Template filter (only shown if multiple templates exist in Stage 1) */
+  /* Status filter (always shown - harness intrinsic) - placed to the right of Template */
+  var statuses=RB.distinctStatuses(c);
+  html+='<div style="display:flex;gap:18px;align-items:center;margin:6px 0;flex-wrap:wrap">';
+  if(hasMultipleTemplates){
+    var tmplList=['All'].concat(templates);
+    html+='<label style="font-size:13px;font-weight:600;color:var(--gr)">Template:</label>';
+    html+='<select onchange="app.updateReportConfig(\'filterTemplate\',this.value)" style="padding:4px 8px;border:1px solid var(--gb);border-radius:4px;font-size:13px">';
+    tmplList.forEach(function(t){html+='<option value="'+RB._htmlEsc(t)+'"'+(t===cfg.filterTemplate?' selected':'')+'>'+RB._htmlEsc(t)+'</option>'});
+    html+='</select>';
+  }
+  /* Status filter - always displayed (harness intrinsic), placed to the right of Template if present */
+  html+='<label style="font-size:13px;font-weight:600;color:var(--gr)'+(hasMultipleTemplates?';margin-left:18px':'')+'">Status:</label>';
+  html+='<select onchange="app.updateReportConfig(\'filterStatus\',this.value)" style="padding:4px 8px;border:1px solid var(--gb);border-radius:4px;font-size:13px">';
+  html+='<option value="All"'+(cfg.filterStatus==='All'?' selected':'')+'>All</option>';
+  statuses.forEach(function(s){html+='<option value="'+RB._htmlEsc(s)+'"'+(s===cfg.filterStatus?' selected':'')+'>'+RB._htmlEsc(s)+'</option>'});
+  html+='</select>';
+  html+='</div>';
+  /* Completeness threshold (Per-File mode) */
+  if(cfg.detail==='file'){
+    html+='<div style="display:flex;gap:12px;align-items:center;margin:6px 0">';
+    html+='<label style="font-size:13px"><input type="checkbox"'+(cfg.filterPctEnabled?' checked':'')+' onchange="app.updateReportConfig(\'filterPctEnabled\',this.checked)"> Optional Completeness Threshold (%): show only files below</label>';
+    html+='<input type="number" min="0" max="100" value="'+cfg.filterPctThreshold+'" onchange="app.updateReportConfig(\'filterPctThreshold\',parseInt(this.value)||75)" style="width:64px;padding:4px 6px;border:1px solid var(--gb);border-radius:4px;font-size:13px"> <span style="font-size:13px">% (default: 75%)</span>';
+    html+='</div>';
+  }
+  /* Presence filter (Field Detail mode) */
+  if(cfg.detail==='field'){
+    html+='<div style="display:flex;gap:14px;align-items:center;margin:6px 0;flex-wrap:wrap">';
+    html+='<label style="font-size:13px;font-weight:600;color:var(--gr)">Presence:</label>';
+    ['Present','Absent','Partial','Indeterminate','Excluded','Not Applicable'].forEach(function(p){
+      html+='<label style="font-size:13px"><input type="checkbox"'+(cfg.filterPresence[p]!==false?' checked':'')+' onchange="app.updateReportConfig(\'filterPresence:'+p+'\',this.checked)"> '+p+'</label>';
+    });
+    html+='</div>';
+  }
+  if(!hasMultipleTemplates&&cfg.detail==='field'){
+    /* No template filter, no Per-File completeness — show note that only Presence applies in Field mode */
+  }
+
+  /* COLUMNS (dynamic — visibleCols = available minus empty-everywhere columns) */
+  html+='<h3 style="margin-top:14px">Columns</h3>';
+  if(visibleCols.length===0){
+    html+='<p style="font-size:13px;color:var(--gr)">No columns available for this detail level.</p>';
+  } else {
+    html+='<div style="display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 14px">';
+    visibleCols.forEach(function(col){
+      var sourceTag=col.src==='stage1'?' <span style="font-size:10px;color:var(--gr)">(Stage 1)</span>':'';
+      html+='<label style="font-size:13px"><input type="checkbox"'+(cfg.cols[col.id]?' checked':'')+' onchange="app.updateReportConfig(\'col:'+col.id+'\',this.checked)"> '+col.label+sourceTag+'</label>';
+    });
+    html+='</div>';
+  }
+
+  /* SORT */
+  html+='<h3>Sort</h3>';
+  html+='<div style="display:flex;gap:12px;align-items:center;margin:6px 0 14px;flex-wrap:wrap">';
+  html+='<label style="font-size:13px;font-weight:600;color:var(--gr)">Sort by:</label>';
+  html+='<select onchange="app.updateReportConfig(\'sortCol\',this.value)" style="padding:4px 8px;border:1px solid var(--gb);border-radius:4px;font-size:13px">';
+  cols.forEach(function(col){html+='<option value="'+col.id+'"'+(col.id===cfg.sortCol?' selected':'')+'>'+col.label+'</option>'});
+  html+='</select>';
+  html+='<label style="font-size:13px"><input type="radio" name="rbSortDir" value="asc"'+(cfg.sortDir==='asc'?' checked':'')+' onchange="app.updateReportConfig(\'sortDir\',\'asc\')"> Ascending</label>';
+  html+='<label style="font-size:13px"><input type="radio" name="rbSortDir" value="desc"'+(cfg.sortDir==='desc'?' checked':'')+' onchange="app.updateReportConfig(\'sortDir\',\'desc\')"> Descending</label>';
+  html+='</div>';
+
+  /* FORMAT */
+  html+='<h3>Format</h3>';
+  html+='<div style="display:flex;gap:18px;margin:6px 0 14px;flex-wrap:wrap">';
+  [['csv','CSV'],['xlsx','Excel (.xlsx)'],['word','Word (.doc)'],['pdf','PDF']].forEach(function(f){
+    html+='<label style="font-size:13px"><input type="radio" name="rbFmt" value="'+f[0]+'"'+(cfg.format===f[0]?' checked':'')+' onchange="app.updateReportConfig(\'format\',\''+f[0]+'\')"> '+f[1]+'</label>';
+  });
+  html+='</div>';
+
+  /* PREVIEW */
+  html+='<h3>Preview</h3>';
+  html+='<div style="font-size:12px;color:var(--gr);margin-bottom:6px">Showing '+rows.length+' of '+rawCount+' rows based on current filters.</div>';
+  html+='<div style="overflow:auto;max-height:360px;border:1px solid var(--gb);border-radius:4px"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+  html+='<tr>';
+  cols.forEach(function(col){html+='<th style="background:var(--bd);color:var(--w);padding:5px 8px;text-align:left;position:sticky;top:0">'+RB._htmlEsc(col.label)+'</th>'});
+  html+='</tr>';
+  rows.slice(0,50).forEach(function(r){
+    html+='<tr>';
+    cols.forEach(function(col){html+='<td style="border-bottom:1px solid var(--gb);padding:4px 8px;vertical-align:top">'+(col.multiline?RB._htmlMulti(r[col.id]):RB._htmlEsc(RB._formatVal(r[col.id],col)))+'</td>'});
+    html+='</tr>';
+  });
+  html+='</table></div>';
+  if(rows.length>50)html+='<div style="font-size:12px;color:var(--gr);margin-top:4px">Preview limited to first 50 rows. Export will include all '+rows.length+' rows.</div>';
+
+  /* ACTIONS */
+  html+='<div style="display:flex;align-items:center;gap:12px;margin-top:18px">';
+  html+='<button class="btn btn-s btn-sm" onclick="app.closeReportBuilder()">&laquo; Back to Scan Complete</button>';
+  html+='<span style="flex:1"></span>';
+  html+='<button class="btn btn-p" onclick="app.generateRBReport()"'+(rows.length===0||cols.length===0?' disabled':'')+'>Generate Export</button>';
+  html+='</div>';
+  html+='</div>';
+  return html;
+}
+
 /* ================================================================
    VERSION HISTORY MODAL
    ================================================================ */
@@ -1289,6 +2011,7 @@ function renderRepair(issues){
    MAIN APPLICATION
    ================================================================ */
 var app={
+  _searchTimer:null,  
   _repairIssues:[],
   init:function(){
     if(!SM.load())SM.init();
@@ -1305,6 +2028,7 @@ var app={
       case 'p1_config':el.innerHTML=nav+renderConfig(SM.ccdm);break;
       case 'p2_upload':el.innerHTML=nav+renderUpload(SM.ccdm,s);document.getElementById('subdz').onclick=function(){document.getElementById('subinput').click()};break;
       case 'p2_summary':el.innerHTML=nav+renderScanSummary(SM.ccdm,s);break;
+      case 'p2_report':el.innerHTML=nav+renderReportBuilderFull(SM.ccdm,s);break;
       case 'p3':el.innerHTML=nav+renderWorkbook(SM.ccdm,s);break;
       default:el.innerHTML=renderPurpose();
     }
@@ -1383,7 +2107,7 @@ if(reqs.length===0){alert('No requirements found in spreadsheet.');return}
         }catch(ex){alert('Error reading Excel: '+ex.message)}
       };
       reader.readAsArrayBuffer(file);
-    } else {alert('Unsupported format. Use JSON or XLSX.')}
+    } else {/* unsupported types now blocked at the file row; no alert needed */}
   },
   toggleProfile:function(i,checked){
     var req=SM.ccdm.requirements_baseline.requirements[i];
@@ -1919,13 +2643,57 @@ setBaselineFilter:function(val){SM.ses._baselineFilter=val;SM.persist();app.rend
     SM.transition('p2_summary');SM.persist();app.render();
   },
   setScanFilter:function(val){SM.ses._scanFilter=val;SM.persist();app.render()},
-  setScanSearch:function(val){SM.ses._scanSearch=val;SM.persist();app.render()},
+  setScanSearch:function(val){
+  SM.ses._scanSearch=val;
+  clearTimeout(app._searchTimer);
+  app._searchTimer=setTimeout(function(){
+    SM.persist();
+    app.render();
+    var inp=document.querySelector('input[placeholder="Search by file name..."]');
+    if(inp){inp.focus();inp.setSelectionRange(val.length,val.length);}
+  },200);
+},
     sortScan:function(col){
     if(SM.ses._scanSortCol===col){SM.ses._scanSortDir=SM.ses._scanSortDir==='asc'?'desc':'asc'}
     else{SM.ses._scanSortCol=col;SM.ses._scanSortDir='asc'}
     SM.persist();app.render();
   },
   goToPart3:function(){SM.transition('p3');app.render()},
+  /* Report Builder (full-screen, accessed from Scan Complete) */
+  openReportBuilder:function(){
+    if(!SM.ses.reportConfig||SM.ses.reportConfig._v!==8)SM.ses.reportConfig=RB.defaultConfig();
+    SM.transition('p2_report');app.render();
+  },
+  closeReportBuilder:function(){
+    SM.transition('p2_summary');app.render();
+  },
+  updateReportConfig:function(key,val){
+    var cfg=SM.ses.reportConfig;
+    if(key==='detail'){RB.onDetailChange(val);SM.persist();app.render();return}
+    if(key.indexOf('col:')===0){var id=key.substring(4);cfg.cols[id]=val;}
+    else if(key.indexOf('filterPresence:')===0){var p=key.substring(15);cfg.filterPresence[p]=val;}
+    else if(key==='title'){
+      cfg.title=val;
+      clearTimeout(app._searchTimer);
+      app._searchTimer=setTimeout(function(){
+        SM.persist();app.render();
+        var inp=document.getElementById('rbTitle');
+        if(inp){inp.focus();inp.setSelectionRange(val.length,val.length);}
+      },200);
+      return;
+    }
+    else{cfg[key]=val;}
+    SM.persist();app.render();
+  },
+  generateRBReport:function(){
+    var cfg=SM.ses.reportConfig;
+    if(cfg.format==='csv')RB.exportCSV(SM.ccdm);
+    else if(cfg.format==='xlsx')RB.exportXLSX(SM.ccdm);
+    else if(cfg.format==='word')RB.exportWord(SM.ccdm);
+    else if(cfg.format==='pdf')RB.exportPDF(SM.ccdm);
+    SM.audit('user','Report Builder export: '+cfg.format+' ('+cfg.detail+')');
+    SM.persist();
+  },
   /* Part 3 */
   switchTab:function(t){SM.ses.activeTab=t;SM.persist();app.render()},
   editCell:function(td){
@@ -2084,7 +2852,13 @@ setBaselineFilter:function(val){SM.ses._baselineFilter=val;SM.persist();app.rend
   setSearch:function(tabId,val){
     if(!SM.ses.gridSearch)SM.ses.gridSearch={};
     SM.ses.gridSearch[tabId]=val;
-    SM.persist();app.render();
+    clearTimeout(app._searchTimer);
+    app._searchTimer=setTimeout(function(){
+      SM.persist();
+      app.render();
+      var inp=document.querySelector('input[placeholder="Search..."]');
+      if(inp){inp.focus();inp.setSelectionRange(val.length,val.length);}
+    },200);
   },
   toggleSort:function(tabId,field){
     if(!SM.ses.gridSortCol)SM.ses.gridSortCol={};
