@@ -1,17 +1,17 @@
 # Skill: update-harness
 
 Purpose
-- Provide a short, repeatable agent workflow for safely updating files under the `harness/` directory and opening a minimal PR.
+- Provide a short, repeatable agent workflow for safely updating files under the `docs/harness/` directory and opening a minimal PR.
 
 When to use
-- UI/content tweaks to pages in `harness/` (text, links, minor layout changes) that require a preview and small, reviewable PR.
+- UI/content tweaks to pages in `docs/harness/` (text, links, minor layout changes) that require a preview and small, reviewable PR.
 
 Trigger phrases
 - "update harness page"
 - "edit harness file and open PR"
 
 Agent workflow (step-by-step)
-1. Inspect the target file in `harness/` and the related template in `grant_req_templates/` if content changes affect requirements.
+1. Inspect the target file in `docs/harness/` and the related template in `grant_req_templates/` if content changes affect requirements.
 2. Make a minimal, focused change. Keep styling and structure consistent with nearby files.
 3. Run the local smoke test to verify render:
 ```

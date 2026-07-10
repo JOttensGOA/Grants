@@ -5,7 +5,7 @@ The tool is intended as a test to understand potential and limitations of AI bui
 
 ## Deployment (Netlify + GitHub Actions)
 
-This repository publishes the static harness located in the `harness/` directory to Netlify. A GitHub Actions workflow (`.github/workflows/deploy-netlify.yml`) will run on pushes to `main` and deploy the site automatically.
+This repository publishes the static harness located in the `docs/` directory to Netlify. A GitHub Actions workflow (`.github/workflows/deploy-netlify.yml`) will run on pushes to `main` and deploy the site automatically.
 
 Setup steps:
 
@@ -18,7 +18,7 @@ gh secret set NETLIFY_AUTH_TOKEN --body "<your-token>" --repo OWNER/REPO
 gh secret set NETLIFY_SITE_ID --body "<your-site-id>" --repo OWNER/REPO
 ```
 
-3. Push changes to `main`. The Actions workflow will deploy the contents of the `harness/` directory to the configured Netlify site.
+3. Push changes to `main`. The Actions workflow will deploy the contents of the `docs/` directory to the configured Netlify site.
 
 Local smoke test:
 
@@ -27,7 +27,7 @@ python3 -m http.server 8000 --directory harness
 # open http://localhost:8000 to verify the harness pages render locally
 ```
 
-If you prefer Netlify's native Git integration, you can instead connect this repository in the Netlify dashboard and set the publish directory to `harness` (or leave `netlify.toml` which already sets `publish = "harness"`).
+If you prefer Netlify's native Git integration, you can instead connect this repository in the Netlify dashboard and set the publish directory to `docs` (or leave `netlify.toml` which already sets `publish = "docs"`).
 
 ### Adding GitHub repository secrets via UI
 
