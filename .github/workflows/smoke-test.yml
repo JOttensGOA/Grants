@@ -1,0 +1,33 @@
+name: PR Smoke Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run harness smoke test
+        run: |
+          set -e
+          echo "Starting local static server from harness/ on port 8000"
+          python3 -m http.server 8000 --directory harness &
+          server_pid=$!
+          sleep 1
+          echo "Checking http://localhost:8000/"
+          if ! curl -fsS http://localhost:8000/ -o /dev/null; then
+            echo "Smoke test failed: harness not serving"
+            kill $server_pid || true
+            exit 1
+          fi
+          echo "Smoke test OK"
+          kill $server_pid || true

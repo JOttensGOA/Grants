@@ -1,0 +1,28 @@
+name: Deploy harness to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload harness as Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: harness
+
+      - name: Deploy Pages
+        uses: actions/deploy-pages@v1
